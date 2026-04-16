@@ -1,0 +1,116 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-sans: 'Montserrat', sans-serif;
+    
+    --color-primary: #1cc2e3;
+    --color-primary-foreground: #FFFFFF;
+    
+    --color-secondary: #0a2239;
+    --color-secondary-foreground: #F8F9FA;
+    
+    --color-accent: #c3a37a;
+    --color-accent-foreground: #0a2239;
+    
+    --color-background: #F8F9FA;
+    --color-foreground: #0a2239;
+    
+    --color-card: #FFFFFF;
+    --color-card-foreground: #0a2239;
+
+    --color-dark: #0a2239;
+
+    --color-border: rgba(10, 34, 57, 0.1);
+    --color-input: rgba(10, 34, 57, 0.1);
+    --color-ring: #1cc2e3;
+
+    --radius-lg: 0px;
+    --radius-md: 0px;
+    --radius-sm: 0px;
+}
+
+:root {
+    --background: #F8F9FA;
+    --foreground: #0a2239;
+    --card: #FFFFFF;
+    --card-foreground: #0a2239;
+    --popover: #FFFFFF;
+    --popover-foreground: #0a2239;
+    --primary: #1cc2e3;
+    --primary-foreground: #FFFFFF;
+    --secondary: #0a2239;
+    --secondary-foreground: #F8F9FA;
+    --muted: #E9ECEF;
+    --muted-foreground: #6C757D;
+    --accent: #c3a37a;
+    --accent-foreground: #0a2239;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --border: rgba(10, 34, 57, 0.1);
+    --input: rgba(10, 34, 57, 0.1);
+    --ring: #1cc2e3;
+    --radius: 0px;
+    
+    --navy: #0a2239;
+    --sky: #1cc2e3;
+    --sand: #c3a37a;
+    --dark: #0a2239;
+    --shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground antialiased;
+    }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-light tracking-tight;
+    }
+}
+
+.glass {
+  background: rgba(245, 242, 237, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(26, 26, 26, 0.05);
+}
+
+.text-gold {
+  color: #C5A021;
+}
+
+.bg-gold {
+  background-color: #C5A021;
+}
+
+.oval-mask {
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.nav-grid-item {
+  @apply border-r border-border py-4 px-6 text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-dark hover:text-white transition-all duration-500;
+}
+
+.luxury-card {
+  @apply bg-white border border-border p-8 transition-all duration-700 hover:shadow-2xl hover:-translate-y-2;
+}
+
+.section-divider {
+  @apply h-[1px] w-full bg-border my-12;
+}
