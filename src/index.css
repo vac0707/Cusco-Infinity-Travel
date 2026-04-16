@@ -1,24 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: 'Cormorant Garamond', serif;
-    --font-sans: 'Montserrat', sans-serif;
+    --font-heading: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
     
-    --color-primary: #1cc2e3;
+    --color-primary: #D4AF37;
     --color-primary-foreground: #FFFFFF;
     
     --color-secondary: #0a2239;
     --color-secondary-foreground: #F8F9FA;
     
-    --color-accent: #c3a37a;
-    --color-accent-foreground: #0a2239;
+    --color-accent: #B8860B;
+    --color-accent-foreground: #FFFFFF;
     
-    --color-background: #F8F9FA;
+    --color-background: #FDFBF7;
     --color-foreground: #0a2239;
     
     --color-card: #FFFFFF;
@@ -26,42 +26,45 @@
 
     --color-dark: #0a2239;
 
-    --color-border: rgba(10, 34, 57, 0.1);
-    --color-input: rgba(10, 34, 57, 0.1);
-    --color-ring: #1cc2e3;
+    --color-border: rgba(10, 34, 57, 0.08);
+    --color-input: rgba(10, 34, 57, 0.08);
+    --color-ring: #D4AF37;
 
-    --radius-lg: 0px;
-    --radius-md: 0px;
-    --radius-sm: 0px;
+    --radius-lg: 4px;
+    --radius-md: 2px;
+    --radius-sm: 1px;
 }
 
 :root {
-    --background: #F8F9FA;
+    --background: #FDFBF7;
     --foreground: #0a2239;
     --card: #FFFFFF;
     --card-foreground: #0a2239;
     --popover: #FFFFFF;
     --popover-foreground: #0a2239;
-    --primary: #1cc2e3;
+    --primary: #D4AF37;
     --primary-foreground: #FFFFFF;
     --secondary: #0a2239;
     --secondary-foreground: #F8F9FA;
-    --muted: #E9ECEF;
-    --muted-foreground: #6C757D;
-    --accent: #c3a37a;
-    --accent-foreground: #0a2239;
-    --destructive: #EF4444;
+    --muted: #F1F3F5;
+    --muted-foreground: #64748B;
+    --accent: #B8860B;
+    --accent-foreground: #FFFFFF;
+    --destructive: #E11D48;
     --destructive-foreground: #FFFFFF;
-    --border: rgba(10, 34, 57, 0.1);
-    --input: rgba(10, 34, 57, 0.1);
-    --ring: #1cc2e3;
-    --radius: 0px;
+    --border: rgba(10, 34, 57, 0.08);
+    --input: rgba(10, 34, 57, 0.08);
+    --ring: #D4AF37;
+    --radius: 4px;
     
     --navy: #0a2239;
-    --sky: #1cc2e3;
-    --sand: #c3a37a;
+    --sky: #D4AF37;
+    --sand: #B8860B;
     --dark: #0a2239;
-    --shadow: 0 10px 30px rgba(0,0,0,0.05);
+    --shadow: 0 10px 40px rgba(0,0,0,0.06);
+
+    /* Metallic Gold Gradient */
+    --gold-metallic: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
 }
 
 @layer base {
@@ -109,6 +112,26 @@
 
 .luxury-card {
   @apply bg-white border border-border p-8 transition-all duration-700 hover:shadow-2xl hover:-translate-y-2;
+}
+
+.bg-metallic {
+  background: var(--gold-metallic);
+  background-size: 200% 200%;
+  animation: shine 5s linear infinite;
+}
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-metallic {
+  background: var(--gold-metallic);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: shine 5s linear infinite;
 }
 
 .section-divider {

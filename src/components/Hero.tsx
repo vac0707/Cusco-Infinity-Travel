@@ -8,48 +8,54 @@ export default function Hero() {
     <section className="relative h-screen flex items-center justify-center overflow-hidden bg-dark">
       {/* Background Image with Parallax Effect */}
       <motion.div 
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.6 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+        initial={{ scale: 1, opacity: 0 }}
+        animate={{ scale: 1.1, opacity: 0.65 }}
+        transition={{ 
+          duration: 20, 
+          ease: "linear",
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: 'url("https://res.cloudinary.com/dcnynnstm/image/upload/q_auto/f_auto/v1776266712/590375588_1277322274422006_5027036865690629754_n_la8hdb.jpg")',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-dark/40 via-transparent to-dark/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-dark/60 via-dark/20 to-dark/90" />
       </motion.div>
 
       <div className="container relative z-10 px-4 text-center text-white">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
+          transition={{ duration: 1.2, delay: 0.3 }}
         >
-          <span className="inline-block px-6 py-1 mb-8 text-[10px] font-bold tracking-[0.4em] uppercase border border-white/20 rounded-full backdrop-blur-sm">
+          <span className="inline-block px-8 py-2 mb-10 text-[11px] font-semibold tracking-[0.5em] uppercase border border-white/30 rounded-full backdrop-blur-md bg-white/5">
             Cusco Infinity Travel
           </span>
-          <h1 className="text-[12vw] md:text-[10vw] font-light mb-8 leading-[0.85] tracking-tighter font-heading">
+          <h1 className="text-[14vw] md:text-[11vw] font-medium mb-10 leading-[0.8] tracking-tighter font-heading uppercase">
             DESCUBRE <br />
-            <span className="italic text-primary">CUSCO</span>
+            <span className="italic text-metallic">CUSCO</span>
           </h1>
-          <p className="text-sm md:text-base mb-12 max-w-lg mx-auto opacity-70 font-sans font-light tracking-wide leading-relaxed">
-            Asesoría personalizada para transformar tus sueños en experiencias inolvidables en el corazón de los Andes.
+          <p className="text-sm md:text-lg mb-14 max-w-2xl mx-auto opacity-80 font-sans font-light tracking-[0.05em] leading-relaxed">
+            Asesoría experta inspirada en la mística de los Andes para transformar tus viajes en legados inolvidables.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
             <Button 
               size="lg" 
-              className="bg-primary hover:bg-primary/90 text-white px-10 py-8 text-xs font-bold tracking-[0.2em] uppercase rounded-none transition-all duration-500 hover:px-12"
+              className="bg-metallic text-dark hover:scale-105 transition-all duration-500 px-12 py-8 text-[11px] font-bold tracking-[0.3em] uppercase rounded-sm border-none shadow-xl shadow-primary/20"
               onClick={() => document.getElementById('paquetes')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Explorar Paquetes
             </Button>
-            <div className="hidden sm:block h-[1px] w-12 bg-white/30" />
+            <div className="hidden sm:block h-[1px] w-16 bg-white/20" />
             <button 
-              className="text-[10px] uppercase tracking-[0.3em] font-bold hover:text-primary transition-colors"
+              className="text-[11px] uppercase tracking-[0.4em] font-bold text-white/80 hover:text-primary transition-all duration-300 relative group"
               onClick={() => document.getElementById('nosotros')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Conócenos
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-full" />
             </button>
           </div>
         </motion.div>
