@@ -7,6 +7,7 @@ export interface Package {
   difficulty: 'Fácil' | 'Moderado' | 'Desafiante';
   includes: string[];
   excludes: string[];
+  itinerary: string[];
   image: string;
   featured?: boolean;
 }
