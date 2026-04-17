@@ -36,7 +36,7 @@ export default function Packages() {
               <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="absolute top-4 right-4">
                 <span className="bg-metallic text-dark px-4 py-1.5 text-[10px] font-bold tracking-widest rounded-full shadow-lg">
-                  S/ {pkg.price}
+                  $ {pkg.price} <span className="text-[8px] opacity-70">/ per</span>
                 </span>
               </div>
               <div className="absolute bottom-6 left-6 right-6">
@@ -104,7 +104,7 @@ export default function Packages() {
                   </h2>
                   <div className="flex gap-4">
                     <span className="bg-metallic text-dark px-4 py-2 text-xs font-bold tracking-widest">
-                      S/ {selectedPackage.price}
+                      $ {selectedPackage.price} <span className="text-[9px] opacity-70 ml-1">POR PERSONA</span>
                     </span>
                     <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 text-xs font-bold tracking-widest">
                       {selectedPackage.duration}
