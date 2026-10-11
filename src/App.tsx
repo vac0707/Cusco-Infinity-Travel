@@ -1,61 +1,56 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Packages from './components/Packages';
-import Advisor from './components/Advisor';
-import Testimonials from './components/Testimonials';
-import Destinations from './components/Destinations';
 import Footer from './components/Footer';
-import VirtualAssistant from './components/VirtualAssistant';
 import WhatsAppButton from './components/WhatsAppButton';
+import ScrollToTop from './components/ScrollToTop';
+
+// Lazy loaded page components for optimal performance
+const Home = lazy(() => import('./pages/Home'));
+const ToursCatalog = lazy(() => import('./pages/ToursCatalog'));
+const TourDetail = lazy(() => import('./pages/TourDetail'));
+const DestinationsPage = lazy(() => import('./pages/DestinationsPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-primary">
+          Cusco Infinity Travel
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-background font-sans selection:bg-primary/30">
-      <Navbar />
-      
-      <main>
-        <Hero />
+    <BrowserRouter>
+      <ScrollToTop />
+      <div className="min-h-screen flex flex-col bg-background font-sans selection:bg-primary/30">
+        <Navbar />
         
-        <div className="container mx-auto px-4">
-          <section id="paquetes" className="py-24">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-              <div className="max-w-xl">
-                <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-primary mb-4 block">Experiencias Curadas</span>
-                <h2 className="text-5xl md:text-7xl font-light leading-none">Paquetes <br /><span className="italic">Exclusivos</span></h2>
-              </div>
-              <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
-                Seleccionamos las mejores rutas y experiencias para que vivas la magia de los Andes con total seguridad y confort.
-              </p>
-            </div>
-            <Packages />
-          </section>
+        <main className="flex-1">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/tours" element={<ToursCatalog />} />
+              <Route path="/tours/:id" element={<TourDetail />} />
+              <Route path="/destinos" element={<DestinationsPage />} />
+              <Route path="/nosotros" element={<AboutPage />} />
+              <Route path="/contacto" element={<ContactPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </main>
 
-          <div className="section-divider" />
-
-          <section id="destinos">
-            <Destinations />
-          </section>
-
-          <div className="section-divider" />
-
-          <section id="nosotros">
-            <Advisor />
-          </section>
-
-          <div className="section-divider" />
-
-          <section id="testimonios">
-            <Testimonials />
-          </section>
-        </div>
-      </main>
-
-      <Footer />
-
-      {/* Floating Elements */}
-      <VirtualAssistant />
-      <WhatsAppButton />
-    </div>
+        <Footer />
+        <WhatsAppButton />
+      </div>
+    </BrowserRouter>
   );
 }

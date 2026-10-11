@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cusco-infinity-travel.vercel.app/sitemap.xml
