@@ -3,12 +3,14 @@ import {
   Package, 
   Destination, 
   Testimonial, 
-  SiteSettings 
+  SiteSettings,
+  TourCategory 
 } from '@/types';
 import { 
   PACKAGES, 
   DESTINATIONS, 
   REAL_TESTIMONIALS, 
+  TOUR_CATEGORIES,
   WHATSAPP_NUMBER, 
   WHATSAPP_DISPLAY, 
   AGENCY_EMAIL, 
@@ -53,6 +55,7 @@ const STORAGE_KEYS = {
   PACKAGES: 'cit_packages_v1',
   DESTINATIONS: 'cit_destinations_v1',
   TESTIMONIALS: 'cit_testimonials_v1',
+  CATEGORIES: 'cit_categories_v1',
   SETTINGS: 'cit_settings_v1',
 };
 
@@ -60,6 +63,7 @@ interface AgencyDataContextType {
   packages: Package[];
   destinations: Destination[];
   testimonials: Testimonial[];
+  categories: TourCategory[];
   settings: SiteSettings;
   isFirebaseConnected: boolean;
   isLoading: boolean;
@@ -71,6 +75,9 @@ interface AgencyDataContextType {
   addDestination: (dest: Destination) => Promise<void>;
   updateDestination: (id: string, updates: Partial<Destination>) => Promise<void>;
   deleteDestination: (id: string) => Promise<void>;
+  addCategory: (cat: TourCategory) => Promise<void>;
+  updateCategory: (id: string, updates: Partial<TourCategory>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
   addTestimonial: (test: Testimonial) => Promise<void>;
   updateTestimonial: (id: string, updates: Partial<Testimonial>) => Promise<void>;
   deleteTestimonial: (id: string) => Promise<void>;
@@ -118,6 +125,16 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
     }));
   });
 
+  const [categories, setCategories] = useState<TourCategory[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return TOUR_CATEGORIES;
+  });
+
   const [settings, setSettings] = useState<SiteSettings>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -155,6 +172,14 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
       // ignore
     }
   }, [testimonials]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    } catch {
+      // ignore
+    }
+  }, [categories]);
 
   useEffect(() => {
     try {
@@ -330,6 +355,50 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
+  // Operations for Categories
+  const addCategory = useCallback(async (newCat: TourCategory) => {
+    setCategories(prev => [...prev, newCat]);
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'categories', newCat.id), newCat);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `categories/${newCat.id}`);
+      }
+    }
+  }, []);
+
+  const updateCategory = useCallback(async (id: string, updates: Partial<TourCategory>) => {
+    let updatedCat: TourCategory | undefined;
+    setCategories(prev => prev.map(c => {
+      if (c.id === id) {
+        updatedCat = { ...c, ...updates };
+        return updatedCat;
+      }
+      return c;
+    }));
+
+    if (isFirebaseConfigured && db && updatedCat) {
+      try {
+        await setDoc(doc(db, 'categories', id), updatedCat, { merge: true });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `categories/${id}`);
+      }
+    }
+  }, []);
+
+  const deleteCategory = useCallback(async (id: string) => {
+    setCategories(prev => prev.filter(c => c.id !== id));
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'categories', id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `categories/${id}`);
+      }
+    }
+  }, []);
+
   // Operations for Testimonials
   const addTestimonial = useCallback(async (newTest: Testimonial) => {
     setTestimonials(prev => [newTest, ...prev]);
@@ -418,7 +487,13 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         count++;
       }
 
-      // 4. Migrate Site Settings
+      // 4. Migrate Categories
+      for (const c of categories) {
+        await setDoc(doc(db, 'categories', c.id), c, { merge: true });
+        count++;
+      }
+
+      // 5. Migrate Site Settings
       await setDoc(doc(db, 'site_settings', 'general'), settings, { merge: true });
 
       setIsFirebaseConnected(true);
@@ -427,13 +502,14 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
       const msg = err instanceof Error ? err.message : String(err);
       return { success: false, count: 0, error: msg };
     }
-  }, [packages, destinations, testimonials, settings]);
+  }, [packages, destinations, testimonials, categories, settings]);
 
   // Reset to default data
   const resetToDefaultData = useCallback(() => {
     localStorage.removeItem(STORAGE_KEYS.PACKAGES);
     localStorage.removeItem(STORAGE_KEYS.DESTINATIONS);
     localStorage.removeItem(STORAGE_KEYS.TESTIMONIALS);
+    localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.SETTINGS);
 
     setPackages(PACKAGES.map(p => ({ ...p, active: p.active !== false })));
@@ -443,6 +519,7 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
       active: (t as { active?: boolean }).active !== false,
       avatar: (t as { avatar?: string }).avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
     })));
+    setCategories(TOUR_CATEGORIES);
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
@@ -452,6 +529,7 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         packages,
         destinations,
         testimonials,
+        categories,
         settings,
         isFirebaseConnected,
         isLoading,
@@ -463,6 +541,9 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         addDestination,
         updateDestination,
         deleteDestination,
+        addCategory,
+        updateCategory,
+        deleteCategory,
         addTestimonial,
         updateTestimonial,
         deleteTestimonial,

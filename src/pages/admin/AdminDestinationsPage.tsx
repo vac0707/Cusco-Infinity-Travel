@@ -30,7 +30,17 @@ const EMPTY_DESTINATION: Destination = {
 };
 
 export default function AdminDestinationsPage() {
-  const { destinations, packages, addDestination, updateDestination, deleteDestination } = useAgencyData();
+  const { 
+    destinations, 
+    packages, 
+    addDestination, 
+    updateDestination, 
+    deleteDestination,
+    categories,
+    addCategory,
+    updateCategory,
+    deleteCategory
+  } = useAgencyData();
   const [activeTab, setActiveTab] = useState<'destinations' | 'categories'>('destinations');
 
   // Destination Modal
@@ -39,9 +49,16 @@ export default function AdminDestinationsPage() {
   const [currentDest, setCurrentDest] = useState<Destination>(EMPTY_DESTINATION);
   const [destToDelete, setDestToDelete] = useState<Destination | null>(null);
 
-  // Category Edit State (local demo state)
-  const [categoriesList, setCategoriesList] = useState<TourCategory[]>(TOUR_CATEGORIES);
-  const [editingCategory, setEditingCategory] = useState<TourCategory | null>(null);
+  // Category State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCategoryEditing, setIsCategoryEditing] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<TourCategory>({
+    id: '',
+    name: '',
+    description: '',
+    image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80'
+  });
+  const [categoryToDelete, setCategoryToDelete] = useState<TourCategory | null>(null);
   const [catSuccessMsg, setCatSuccessMsg] = useState(false);
 
   const handleOpenCreateDest = () => {
@@ -93,11 +110,48 @@ export default function AdminDestinationsPage() {
     setDestToDelete(null);
   };
 
-  const handleSaveCategory = (e: React.FormEvent) => {
+  const handleOpenCreateCategory = () => {
+    setIsCategoryEditing(false);
+    setCurrentCategory({
+      id: `cat-${Date.now().toString().slice(-4)}`,
+      name: '',
+      description: '',
+      image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80'
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleOpenEditCategory = (cat: TourCategory) => {
+    setIsCategoryEditing(true);
+    setCurrentCategory(cat);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingCategory) return;
-    setCategoriesList(prev => prev.map(c => c.id === editingCategory.id ? editingCategory : c));
-    setEditingCategory(null);
+    if (!currentCategory.name.trim()) return;
+
+    if (!currentCategory.id.trim()) {
+      currentCategory.id = currentCategory.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+    }
+
+    if (isCategoryEditing) {
+      await updateCategory(currentCategory.id, currentCategory);
+    } else {
+      await addCategory(currentCategory);
+    }
+    setIsCategoryModalOpen(false);
+    setCatSuccessMsg(true);
+    setTimeout(() => setCatSuccessMsg(false), 2500);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    await deleteCategory(categoryToDelete.id);
+    setCategoryToDelete(null);
     setCatSuccessMsg(true);
     setTimeout(() => setCatSuccessMsg(false), 2500);
   };
@@ -123,13 +177,21 @@ export default function AdminDestinationsPage() {
           </p>
         </div>
 
-        {activeTab === 'destinations' && (
+        {activeTab === 'destinations' ? (
           <Button
             onClick={handleOpenCreateDest}
             className="bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider gap-1.5 h-10 rounded-sm"
           >
             <Plus size={15} />
             <span>Añadir Destino</span>
+          </Button>
+        ) : (
+          <Button
+            onClick={handleOpenCreateCategory}
+            className="bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider gap-1.5 h-10 rounded-sm"
+          >
+            <Plus size={15} />
+            <span>Añadir Categoría</span>
           </Button>
         )}
       </div>
@@ -154,7 +216,7 @@ export default function AdminDestinationsPage() {
           }`}
         >
           <Layers size={15} />
-          <span>Categorías Temáticas ({categoriesList.length})</span>
+          <span>Categorías Temáticas ({categories.length})</span>
         </button>
       </div>
 
@@ -237,13 +299,12 @@ export default function AdminDestinationsPage() {
           {catSuccessMsg && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-sm flex items-center gap-2">
               <Check size={16} />
-              <span>Categoría actualizada correctamente para la sesión demo.</span>
+              <span>Categoría guardada o actualizada correctamente.</span>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categoriesList.map((cat) => {
-              // Count packages in this category
+            {categories.map((cat) => {
               const count = packages.filter(p => p.categories?.includes(cat.id)).length;
               return (
                 <div key={cat.id} className="bg-white rounded-sm border border-stone-200 shadow-sm p-5 flex flex-col justify-between">
@@ -261,14 +322,23 @@ export default function AdminDestinationsPage() {
                     <p className="text-xs text-stone-500 leading-relaxed mt-1">{cat.description}</p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t flex justify-end">
+                  <div className="mt-4 pt-3 border-t flex items-center justify-between">
                     <button
                       type="button"
-                      onClick={() => setEditingCategory(cat)}
+                      onClick={() => handleOpenEditCategory(cat)}
                       className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
                     >
                       <Edit size={12} />
-                      <span>Editar Categoría</span>
+                      <span>Editar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategoryToDelete(cat)}
+                      className="text-xs font-semibold text-stone-400 hover:text-rose-600 flex items-center gap-1"
+                    >
+                      <Trash2 size={12} />
+                      <span>Eliminar</span>
                     </button>
                   </div>
                 </div>
@@ -386,7 +456,7 @@ export default function AdminDestinationsPage() {
                           <input
                             type="checkbox"
                             checked={isSelected || false}
-                            onChange={() => {}} // handled by parent div
+                            onChange={() => {}}
                             className="w-3.5 h-3.5 accent-primary shrink-0"
                           />
                           <span className="font-medium text-dark truncate">{pkg.title}</span>
@@ -422,38 +492,53 @@ export default function AdminDestinationsPage() {
         </div>
       )}
 
-      {/* EDIT CATEGORY MODAL */}
-      {editingCategory && (
+      {/* CATEGORY CREATE/EDIT MODAL */}
+      {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-sm border border-stone-200 shadow-2xl w-full max-w-lg p-6 animate-fadeIn">
             <div className="flex items-center justify-between mb-4 border-b pb-2">
               <h3 className="font-heading font-medium text-lg text-dark">
-                Editar Categoría: {editingCategory.name}
+                {isCategoryEditing ? `Editar Categoría: ${currentCategory.name}` : 'Crear Nueva Categoría'}
               </h3>
-              <button type="button" onClick={() => setEditingCategory(null)} className="text-stone-400 hover:text-dark">
+              <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="text-stone-400 hover:text-dark">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSaveCategory} className="space-y-4">
-              <div>
-                <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Nombre</label>
-                <Input
-                  type="text"
-                  required
-                  value={editingCategory.name}
-                  onChange={(e) => setEditingCategory(prev => prev ? ({ ...prev, name: e.target.value }) : null)}
-                  className="text-xs h-9"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Nombre *</label>
+                  <Input
+                    type="text"
+                    required
+                    value={currentCategory.name}
+                    onChange={(e) => setCurrentCategory(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Ej. Caminatas Andinas"
+                    className="text-xs h-9"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Identificador (Slug) *</label>
+                  <Input
+                    type="text"
+                    required
+                    disabled={isCategoryEditing}
+                    value={currentCategory.id}
+                    onChange={(e) => setCurrentCategory(prev => ({ ...prev, id: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') }))}
+                    placeholder="caminatas-andinas"
+                    className="text-xs h-9 font-mono"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Imagen (URL)</label>
+                <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Imagen (URL) *</label>
                 <Input
                   type="url"
                   required
-                  value={editingCategory.image}
-                  onChange={(e) => setEditingCategory(prev => prev ? ({ ...prev, image: e.target.value }) : null)}
+                  value={currentCategory.image}
+                  onChange={(e) => setCurrentCategory(prev => ({ ...prev, image: e.target.value }))}
                   className="text-xs h-9"
                 />
               </div>
@@ -462,18 +547,19 @@ export default function AdminDestinationsPage() {
                 <label className="text-[10px] uppercase font-bold text-stone-600 block mb-1">Descripción</label>
                 <textarea
                   rows={3}
-                  value={editingCategory.description}
-                  onChange={(e) => setEditingCategory(prev => prev ? ({ ...prev, description: e.target.value }) : null)}
+                  value={currentCategory.description}
+                  onChange={(e) => setCurrentCategory(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full p-2 text-xs border border-stone-200 rounded-sm"
+                  placeholder="Descripción de la categoría temática..."
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t">
-                <Button type="button" variant="outline" onClick={() => setEditingCategory(null)} className="text-xs">
+                <Button type="button" variant="outline" onClick={() => setIsCategoryModalOpen(false)} className="text-xs">
                   Cancelar
                 </Button>
                 <Button type="submit" className="bg-primary text-white text-xs font-bold uppercase">
-                  Guardar Cambios
+                  Guardar Categoría
                 </Button>
               </div>
             </form>
@@ -481,7 +567,7 @@ export default function AdminDestinationsPage() {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION */}
+      {/* DELETE DESTINATION CONFIRMATION */}
       {destToDelete && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-sm border border-stone-200 p-6 max-w-md w-full shadow-2xl animate-fadeIn">
@@ -518,6 +604,53 @@ export default function AdminDestinationsPage() {
           </div>
         </div>
       )}
+
+      {/* DELETE CATEGORY CONFIRMATION */}
+      {categoryToDelete && (() => {
+        const usageCount = packages.filter(p => p.categories?.includes(categoryToDelete.id as any)).length;
+        return (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-sm border border-stone-200 p-6 max-w-md w-full shadow-2xl animate-fadeIn">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-rose-100 text-rose-800 rounded-sm shrink-0">
+                  <AlertCircle size={20} />
+                </div>
+                <div>
+                  <h3 className="font-heading font-medium text-lg text-dark">
+                    ¿Eliminar categoría "{categoryToDelete.name}"?
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Esta acción eliminará la categoría del sistema de demostración.
+                  </p>
+                  {usageCount > 0 && (
+                    <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded text-xs flex items-center gap-2">
+                      <AlertCircle size={16} className="text-amber-700 shrink-0" />
+                      <span><strong>¡Advertencia!</strong> Hay {usageCount} paquetes turísticos asociados a esta categoría.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCategoryToDelete(null)}
+                  className="px-3 py-1.5 text-xs text-stone-600 hover:text-dark font-medium rounded-sm border border-stone-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteCategory}
+                  className="px-4 py-1.5 text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-sm uppercase tracking-wider"
+                >
+                  Sí, eliminar categoría
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );
