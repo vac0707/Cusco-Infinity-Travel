@@ -1,32 +1,9 @@
-import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { PACKAGES, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/constants';
-import SEOHead from '@/components/SEOHead';
-import TourCard from '@/components/TourCard';
-import TourGallery from '@/components/TourGallery';
-import { Button } from '@/components/ui/button';
-import { 
-  Clock, 
-  MapPin, 
-  Activity, 
-  Mountain, 
-  Check, 
-  Minus, 
-  AlertCircle, 
-  Phone, 
-  ArrowLeft, 
-  Share2, 
-  Calendar,
-  ShieldCheck,
-  Compass
-} from 'lucide-react';
-
+import { useAgencyData } from '@/context/AgencyDataContext';
 
 export default function TourDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const packages = PACKAGES;
-  const settings = { whatsappNumber: WHATSAPP_NUMBER, whatsappDisplay: WHATSAPP_DISPLAY };
+  const { packages, settings } = useAgencyData();
 
   // Find tour by ID
   const tour = packages.find((p) => p.id === id);

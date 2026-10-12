@@ -1,25 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { TOUR_CATEGORIES, PACKAGES } from '@/constants';
-import { TourCategorySlug, TourDifficulty } from '@/types';
-import TourCard from '@/components/TourCard';
-import SEOHead from '@/components/SEOHead';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Search, 
-  RotateCcw, 
-  SlidersHorizontal, 
-  Clock, 
-  Activity, 
-  DollarSign, 
-  Tag, 
-  X
-} from 'lucide-react';
+import { useAgencyData } from '@/context/AgencyDataContext';
 
 export default function ToursCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const packages = PACKAGES;
+  const { packages } = useAgencyData();
 
   // Filter only active packages for the public catalog
   const activePackages = useMemo(() => {

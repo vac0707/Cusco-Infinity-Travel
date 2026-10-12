@@ -1,13 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { DESTINATIONS, PACKAGES } from '@/constants';
-import SEOHead from '@/components/SEOHead';
-import { Button } from '@/components/ui/button';
-import { MapPin, Mountain, ArrowRight, Compass } from 'lucide-react';
+import { useAgencyData } from '@/context/AgencyDataContext';
 
 export default function DestinationsPage() {
-  const destinations = DESTINATIONS;
-  const packages = PACKAGES;
+  const { destinations, packages } = useAgencyData();
 
   return (
     <div className="min-h-screen bg-background pt-28 pb-24">
