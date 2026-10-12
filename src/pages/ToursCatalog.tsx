@@ -19,31 +19,71 @@ import {
 
 export default function ToursCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialCategory = searchParams.get('categoria') as TourCategorySlug | null;
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'todos');
-  const [selectedDuration, setSelectedDuration] = useState<string>('todas');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('todas');
-  const [maxPrice, setMaxPrice] = useState<number>(300);
+  // Read URL params
+  const initialCategory = (searchParams.get('categoria') as TourCategorySlug) || 'todos';
+  const initialDuration = searchParams.get('duracion') || 'todas';
+  const initialDifficulty = searchParams.get('dificultad') || 'todas';
+  const initialQuery = searchParams.get('q') || '';
+  const initialPrice = searchParams.get('precio') ? Number(searchParams.get('precio')) : 300;
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
+  const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>(initialDifficulty);
+  const [maxPrice, setMaxPrice] = useState<number>(initialPrice);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Sync with searchParams if changed from outside
   useEffect(() => {
-    const cat = searchParams.get('categoria');
-    if (cat) {
-      setSelectedCategory(cat);
-    }
+    const cat = searchParams.get('categoria') || 'todos';
+    const dur = searchParams.get('duracion') || 'todas';
+    const dif = searchParams.get('dificultad') || 'todas';
+    const q = searchParams.get('q') || '';
+    const pr = searchParams.get('precio') ? Number(searchParams.get('precio')) : 300;
+
+    setSelectedCategory(cat);
+    setSelectedDuration(dur);
+    setSelectedDifficulty(dif);
+    setSearchQuery(q);
+    setMaxPrice(pr);
   }, [searchParams]);
+
+  const updateUrlParams = (updates: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === 'todos' || value === 'todas') {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams);
+  };
 
   const handleCategoryChange = (catId: string) => {
     setSelectedCategory(catId);
-    if (catId === 'todos') {
-      searchParams.delete('categoria');
-    } else {
-      searchParams.set('categoria', catId);
-    }
-    setSearchParams(searchParams);
+    updateUrlParams({ categoria: catId === 'todos' ? null : catId });
+  };
+
+  const handleDurationChange = (dur: string) => {
+    setSelectedDuration(dur);
+    updateUrlParams({ duracion: dur === 'todas' ? null : dur });
+  };
+
+  const handleDifficultyChange = (dif: string) => {
+    setSelectedDifficulty(dif);
+    updateUrlParams({ dificultad: dif === 'todas' ? null : dif });
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    updateUrlParams({ q: query.trim() ? query.trim() : null });
+  };
+
+  const handlePriceChange = (price: number) => {
+    setMaxPrice(price);
+    updateUrlParams({ precio: price < 300 ? price.toString() : null });
   };
 
   const resetFilters = () => {
@@ -137,12 +177,12 @@ export default function ToursCatalog() {
                 type="text"
                 placeholder="Buscar por nombre o lugar (ej. Humantay, Pisac, Salineras)..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10 text-xs h-11 bg-muted/20 border-border focus-visible:ring-primary"
               />
               {searchQuery && (
                 <button 
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => handleSearchChange('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-dark"
                 >
                   <X size={14} />
@@ -216,7 +256,7 @@ export default function ToursCatalog() {
               </label>
               <select
                 value={selectedDuration}
-                onChange={(e) => setSelectedDuration(e.target.value)}
+                onChange={(e) => handleDurationChange(e.target.value)}
                 className="w-full text-xs h-10 px-3 bg-muted/20 border border-border rounded-sm text-dark focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="todas">Todas las duraciones</option>
@@ -234,7 +274,7 @@ export default function ToursCatalog() {
               </label>
               <select
                 value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                onChange={(e) => handleDifficultyChange(e.target.value)}
                 className="w-full text-xs h-10 px-3 bg-muted/20 border border-border rounded-sm text-dark focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="todas">Todos los niveles</option>
@@ -261,7 +301,7 @@ export default function ToursCatalog() {
                 max="300"
                 step="5"
                 value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                onChange={(e) => handlePriceChange(Number(e.target.value))}
                 className="w-full accent-primary cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-muted-foreground mt-1 font-light">

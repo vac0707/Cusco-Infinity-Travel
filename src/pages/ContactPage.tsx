@@ -34,9 +34,9 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Pre-format WhatsApp message with form details
+    // Pre-format WhatsApp message with form details including phone
     const text = encodeURIComponent(
-      `Hola Cusco Infinity Travel,\nMi nombre es: ${formData.name || 'Viajero'}\nCorreo: ${formData.email || 'No especificado'}\nDestino de interés: ${formData.destination || 'Cusco en general'}\nFechas estimadas: ${formData.dates || 'Por definir'}\nMensaje: ${formData.message || 'Deseo cotizar disponibilidad y opciones.'}`
+      `Hola Cusco Infinity Travel,\nMi nombre es: ${formData.name || 'Viajero'}\nTeléfono: ${formData.phone || 'No especificado'}\nCorreo: ${formData.email || 'No especificado'}\nDestino de interés: ${formData.destination || 'Cusco en general'}\nFechas estimadas: ${formData.dates || 'Por definir'}\nMensaje: ${formData.message || 'Deseo cotizar disponibilidad y opciones.'}`
     );
     window.open(`https://wa.me/51${WHATSAPP_NUMBER}?text=${text}`, '_blank');
     setSubmitted(true);
@@ -192,7 +192,7 @@ export default function ContactPage() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <label className="text-[10px] uppercase tracking-wider font-bold text-dark/70 block mb-1.5">
                       Nombre Completo *
@@ -203,6 +203,20 @@ export default function ContactPage() {
                       placeholder="Ej. Carlos Mendoza"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="text-xs h-11 bg-muted/20 border-border focus-visible:ring-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-dark/70 block mb-1.5">
+                      Teléfono / WhatsApp *
+                    </label>
+                    <Input
+                      type="tel"
+                      required
+                      placeholder="+51 987 654 321"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="text-xs h-11 bg-muted/20 border-border focus-visible:ring-primary"
                     />
                   </div>

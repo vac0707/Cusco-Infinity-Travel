@@ -53,96 +53,113 @@ export default function ExperienceQuiz() {
     setStep(1);
   };
 
-  // Deterministic scoring function matching PACKAGES
+  // Deterministic scoring function matching PACKAGES respecting budget, duration and difficulty
   const recommendations = useMemo(() => {
     if (step !== 5) return [];
 
-    const scored = PACKAGES.map(pkg => {
+    // 1. Filter packages that strictly satisfy hard constraints
+    let eligible = PACKAGES.filter(pkg => {
+      // Budget filter
+      if (answers.budget === 'economico' && pkg.price > 40) return false;
+      if (answers.budget === 'moderado' && (pkg.price <= 40 || pkg.price > 70)) return false;
+      if (answers.budget === 'exclusivo' && pkg.price <= 70) return false;
+
+      // Duration filter
+      if (answers.duration === 'medio-dia' && pkg.duration !== 'Medio Día') return false;
+      if (answers.duration === 'un-dia' && pkg.duration !== '1 Día') return false;
+
+      // Difficulty filter
+      if (answers.difficulty === 'facil' && pkg.difficulty !== 'Fácil') return false;
+      if (answers.difficulty === 'moderado' && pkg.difficulty !== 'Moderado') return false;
+      if (answers.difficulty === 'desafiante' && pkg.difficulty !== 'Desafiante') return false;
+
+      return true;
+    });
+
+    // If too strict (0 matches due to very niche combination), relax progressively
+    if (eligible.length === 0) {
+      eligible = PACKAGES.filter(pkg => {
+        // Enforce budget at minimum if set
+        if (answers.budget === 'economico' && pkg.price > 40) return false;
+        if (answers.budget === 'moderado' && (pkg.price <= 40 || pkg.price > 70)) return false;
+        if (answers.budget === 'exclusivo' && pkg.price <= 70) return false;
+        return true;
+      });
+    }
+
+    // Final fallback to all packages if still empty
+    if (eligible.length === 0) {
+      eligible = PACKAGES;
+    }
+
+    const scored = eligible.map(pkg => {
       let score = 0;
       const matchReasons: string[] = [];
 
       // 1. Experience Type scoring
       if (answers.experienceType === 'machu-picchu') {
         if (pkg.categories?.includes('machu-picchu')) {
-          score += 10;
+          score += 20;
           matchReasons.push('Destino Machu Picchu');
         }
       } else if (answers.experienceType === 'cultura-historia') {
         if (pkg.categories?.includes('cultura-historia')) {
-          score += 8;
+          score += 18;
           matchReasons.push('Ruta cultural e histórica');
         }
       } else if (answers.experienceType === 'naturaleza-montanas') {
         if (pkg.categories?.includes('naturaleza-montanas')) {
-          score += 8;
+          score += 18;
           matchReasons.push('Paisajes y montañas andinas');
         }
       } else if (answers.experienceType === 'aventura') {
         if (pkg.categories?.includes('aventura')) {
-          score += 8;
+          score += 18;
           matchReasons.push('Aventura y adrenalina');
         }
       } else {
         // 'no-estoy-seguro' - reward featured tours
         if (pkg.featured) {
-          score += 5;
+          score += 10;
           matchReasons.push('Experiencia destacada recomendada');
         }
       }
 
-      // 2. Duration scoring
-      if (answers.duration === 'medio-dia') {
-        if (pkg.duration === 'Medio Día') {
-          score += 6;
-          matchReasons.push('Duración medio día');
-        }
-      } else if (answers.duration === 'un-dia') {
-        if (pkg.duration === '1 Día') {
-          score += 6;
-          matchReasons.push('Duración de 1 día completo');
-        }
-      } else {
-        score += 2; // Any duration is fine
+      // 2. Duration affinity
+      if (answers.duration === 'medio-dia' && pkg.duration === 'Medio Día') {
+        score += 10;
+        matchReasons.push('Duración medio día');
+      } else if (answers.duration === 'un-dia' && pkg.duration === '1 Día') {
+        score += 10;
+        matchReasons.push('Duración de 1 día completo');
       }
 
-      // 3. Budget scoring
-      if (answers.budget === 'economico') {
-        if (pkg.price <= 40) {
-          score += 7;
-          matchReasons.push(`Presupuesto accesible ($${pkg.price} USD)`);
-        }
-      } else if (answers.budget === 'moderado') {
-        if (pkg.price > 40 && pkg.price <= 70) {
-          score += 7;
-          matchReasons.push(`Rango intermedio ($${pkg.price} USD)`);
-        }
-      } else if (answers.budget === 'exclusivo') {
-        if (pkg.price > 70) {
-          score += 7;
-          matchReasons.push(`Experiencia completa ($${pkg.price} USD)`);
-        }
-      } else {
-        score += 2;
+      // 3. Budget affinity
+      if (answers.budget === 'economico' && pkg.price <= 40) {
+        score += 12;
+        matchReasons.push(`Presupuesto accesible ($${pkg.price} USD)`);
+      } else if (answers.budget === 'moderado' && pkg.price > 40 && pkg.price <= 70) {
+        score += 12;
+        matchReasons.push(`Rango intermedio ($${pkg.price} USD)`);
+      } else if (answers.budget === 'exclusivo' && pkg.price > 70) {
+        score += 12;
+        matchReasons.push(`Experiencia integral ($${pkg.price} USD)`);
       }
 
-      // 4. Difficulty scoring
-      if (answers.difficulty === 'facil') {
-        if (pkg.difficulty === 'Fácil') {
-          score += 6;
-          matchReasons.push('Caminata suave y accesible');
-        }
-      } else if (answers.difficulty === 'moderado') {
-        if (pkg.difficulty === 'Moderado') {
-          score += 6;
-          matchReasons.push('Nivel físico moderado');
-        }
-      } else if (answers.difficulty === 'desafiante') {
-        if (pkg.difficulty === 'Desafiante') {
-          score += 6;
-          matchReasons.push('Ruta de alta montaña');
-        }
-      } else {
-        score += 2;
+      // 4. Difficulty affinity
+      if (answers.difficulty === 'facil' && pkg.difficulty === 'Fácil') {
+        score += 10;
+        matchReasons.push('Caminata accesible');
+      } else if (answers.difficulty === 'moderado' && pkg.difficulty === 'Moderado') {
+        score += 10;
+        matchReasons.push('Nivel físico moderado');
+      } else if (answers.difficulty === 'desafiante' && pkg.difficulty === 'Desafiante') {
+        score += 10;
+        matchReasons.push('Ruta de alta montaña');
+      }
+
+      if (pkg.featured) {
+        score += 5;
       }
 
       // Fallback reason if none added

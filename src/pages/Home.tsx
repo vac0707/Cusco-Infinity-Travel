@@ -10,7 +10,8 @@ import {
   MAPS_URL,
   WHATSAPP_DISPLAY,
   AGENCY_EMAIL,
-  AGENCY_ADDRESS
+  AGENCY_ADDRESS,
+  REAL_TESTIMONIALS
 } from '@/constants';
 import TourCard from '@/components/TourCard';
 import ExperienceQuiz from '@/components/ExperienceQuiz';
@@ -442,33 +443,48 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="max-w-3xl mx-auto bg-white p-8 sm:p-12 border border-border rounded-sm shadow-md text-center">
-            <div className="flex justify-center gap-1 text-primary mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={18} fill="currentColor" />
-              ))}
-            </div>
-            <p className="text-base sm:text-lg text-dark/80 font-light italic leading-relaxed mb-6">
-              "Para Cusco Infinity Travel, la reputación se construye viaje a viaje con puntualidad, trato cálido y cumplimiento estricto de cada itinerario acordado."
-            </p>
-            <div className="text-xs uppercase tracking-widest text-dark font-bold">
-              Compromiso de Calidad Cusco Infinity Travel
-            </div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
-              Atención directa en Cusco, Perú
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-border flex justify-center">
-              <a
-                href={MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-primary hover:text-dark transition-colors"
+          {/* Verified Testimonials Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {REAL_TESTIMONIALS.map((t) => (
+              <div 
+                key={t.id} 
+                className="bg-white p-6 sm:p-8 border border-border rounded-sm shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
               >
-                <span>Ver ubicación y opiniones en Google Maps</span>
-                <ExternalLink size={13} />
-              </a>
-            </div>
+                <div>
+                  <div className="flex items-center gap-1 text-primary mb-3">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} size={15} fill="currentColor" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-dark/85 font-light leading-relaxed italic mb-4">
+                    "{t.comment}"
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-border/60">
+                  <span className="text-xs font-semibold text-dark block">
+                    {t.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">
+                    {t.location}
+                  </span>
+                  <span className="text-[10px] text-primary/80 font-medium block mt-1">
+                    Tour: {t.tourTitle}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="max-w-2xl mx-auto text-center pt-4">
+            <a
+              href={MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-primary hover:text-dark transition-colors"
+            >
+              <span>Ver ubicación y opiniones verificadas en Google Maps</span>
+              <ExternalLink size={13} />
+            </a>
           </div>
         </div>
       </section>

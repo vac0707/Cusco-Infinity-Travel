@@ -26,6 +26,7 @@ export interface Package {
   excludes: string[];
   itinerary: string[];
   image: string;
+  gallery?: string[];
   featured?: boolean;
   categories?: TourCategorySlug[];
   recommendations?: string[];
@@ -49,4 +50,5 @@ export interface Destination {
   description: string;
   altitude?: string;
   highlights?: string[];
+  tourIds?: string[];
 }

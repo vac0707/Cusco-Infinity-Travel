@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { PACKAGES, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/constants';
 import SEOHead from '@/components/SEOHead';
@@ -17,7 +17,8 @@ import {
   Share2, 
   Calendar,
   ShieldCheck,
-  Compass
+  Compass,
+  Images
 } from 'lucide-react';
 
 export default function TourDetail() {
@@ -26,6 +27,10 @@ export default function TourDetail() {
 
   // Find tour by ID
   const tour = PACKAGES.find((p) => p.id === id);
+
+  const imagesList = tour ? (tour.gallery && tour.gallery.length > 0 ? tour.gallery : [tour.image]) : [];
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const activeImage = imagesList[selectedImageIndex] || tour?.image || '';
 
   if (!tour) {
     return (
@@ -101,12 +106,12 @@ export default function TourDetail() {
 
       <div className="container mx-auto px-4 sm:px-6">
         
-        {/* Hero Banner */}
-        <div className="relative aspect-[16/9] sm:aspect-[21/9] min-h-[380px] max-h-[560px] rounded-sm overflow-hidden shadow-2xl mb-12 bg-dark">
+        {/* Hero Banner with Multi-Image View */}
+        <div className="relative aspect-[16/9] sm:aspect-[21/9] min-h-[380px] max-h-[560px] rounded-sm overflow-hidden shadow-2xl mb-4 bg-dark">
           <img 
-            src={tour.image} 
+            src={activeImage} 
             alt={`Experiencia ${tour.title} en Cusco`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-all duration-700 ease-in-out"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-dark/20" />
@@ -137,6 +142,37 @@ export default function TourDetail() {
             )}
           </div>
         </div>
+
+        {/* Gallery Thumbnails Strip (if multiple images exist) */}
+        {imagesList.length > 1 && (
+          <div className="mb-12 flex items-center gap-3 overflow-x-auto pb-2 pt-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-2 font-medium shrink-0">
+              <Images size={15} className="text-primary" />
+              <span className="text-[11px] uppercase tracking-wider">Galería ({imagesList.length}):</span>
+            </div>
+            {imagesList.map((imgUrl, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSelectedImageIndex(idx)}
+                aria-label={`Ver foto ${idx + 1} de ${tour.title}`}
+                className={`relative w-20 sm:w-24 h-14 sm:h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-all duration-300 ${
+                  selectedImageIndex === idx 
+                    ? 'border-primary ring-2 ring-primary/30 scale-105 shadow-md' 
+                    : 'border-border/80 opacity-70 hover:opacity-100 hover:border-primary/50'
+                }`}
+              >
+                <img 
+                  src={imgUrl} 
+                  alt={`${tour.title} foto ${idx + 1}`} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+        {imagesList.length <= 1 && <div className="mb-12" />}
 
         {/* Content & Sidebar Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

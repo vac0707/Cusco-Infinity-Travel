@@ -76,6 +76,11 @@ export const PACKAGES: Package[] = [
       'Llevar soles en efectivo para ingresos complementarios y recuerdos'
     ],
     image: 'https://images.unsplash.com/photo-1596728082987-0b1655077f52?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1596728082987-0b1655077f52?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80'
+    ],
     featured: true
   },
   {
@@ -106,6 +111,11 @@ export const PACKAGES: Package[] = [
       'Protector solar y repelente suave'
     ],
     image: 'https://images.unsplash.com/photo-1590050752117-23a9d7f28243?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1590050752117-23a9d7f28243?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
+      'https://www.machupicchu-tours-peru.com/wp-content/uploads/2023/12/maras-moray.jpg'
+    ],
     featured: true
   },
   {
@@ -143,6 +153,11 @@ export const PACKAGES: Package[] = [
       'Poncho impermeable o casaca cortaviento'
     ],
     image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1509299349698-dd22323b5963?auto=format&fit=crop&w=800&q=80'
+    ],
     featured: true
   },
   {
@@ -173,6 +188,11 @@ export const PACKAGES: Package[] = [
       'Pastillas para el soroche o caramelos de coca y agua personal'
     ],
     image: 'https://i0.wp.com/blog.expan.pro/wp-content/uploads/2024/11/VINICUNCA1.jpg?resize=1000%2C716&ssl=1',
+    gallery: [
+      'https://i0.wp.com/blog.expan.pro/wp-content/uploads/2024/11/VINICUNCA1.jpg?resize=1000%2C716&ssl=1',
+      'https://itinerariocusco.com/wp-content/uploads/2024/07/Palccoyo-Rainbow-Mountain.webp',
+      'https://picchutravel.com/wp-content/uploads/cuatrimotos-montana-de-colores-1.jpg'
+    ],
     featured: true
   },
   {
@@ -203,6 +223,11 @@ export const PACKAGES: Package[] = [
       'Cámara resistente al polvo o funda impermeable'
     ],
     image: 'https://picchutravel.com/wp-content/uploads/tour-laguna-humantay-1-dia-cusco-870x555.webp',
+    gallery: [
+      'https://picchutravel.com/wp-content/uploads/tour-laguna-humantay-1-dia-cusco-870x555.webp',
+      'https://denomades.imgix.net/destinos/cusco/2056/7-lagunas-ausangate.jpg',
+      'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80'
+    ],
     featured: true
   },
   {
@@ -576,7 +601,8 @@ export const DESTINATIONS: Destination[] = [
     image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
     description: 'La legendaria llaqta inca, Patrimonio de la Humanidad y Maravilla del Mundo enclavada en la ceja de selva andina.',
     altitude: '2,430 msnm',
-    highlights: ['Templo del Sol', 'Intihuatana', 'Huayna Picchu', 'Aguas Calientes']
+    highlights: ['Templo del Sol', 'Intihuatana', 'Huayna Picchu', 'Aguas Calientes'],
+    tourIds: ['machupicchu-fullday']
   },
   {
     id: 'montana-colores',
@@ -584,7 +610,8 @@ export const DESTINATIONS: Destination[] = [
     image: 'https://i0.wp.com/blog.expan.pro/wp-content/uploads/2024/11/VINICUNCA1.jpg?resize=1000%2C716&ssl=1',
     description: 'La cumbre multicolor más famosa del continente, donde minerales sedimentarios forman un arcoíris en la roca.',
     altitude: '5,036 msnm',
-    highlights: ['Valle Rojo', 'Mirador Principal', 'Vistas del Ausangate', 'Ruta en cuatrimotos']
+    highlights: ['Valle Rojo', 'Mirador Principal', 'Vistas del Ausangate', 'Ruta en cuatrimotos'],
+    tourIds: ['montana-colores', 'colores-cuatrimoto', 'montana-palccoyo']
   },
   {
     id: 'laguna-humantay',
@@ -592,7 +619,8 @@ export const DESTINATIONS: Destination[] = [
     image: 'https://picchutravel.com/wp-content/uploads/tour-laguna-humantay-1-dia-cusco-870x555.webp',
     description: 'Laguna de origen glaciar con aguas de intenso color esmeralda y turquesa custodiada por el nevado Salkantay.',
     altitude: '4,200 msnm',
-    highlights: ['Soraypampa', 'Aguas Turquesas', 'Nevado Salkantay', 'Pachatata ritual']
+    highlights: ['Soraypampa', 'Aguas Turquesas', 'Nevado Salkantay', 'Pachatata ritual'],
+    tourIds: ['laguna-humantay', '7-lagunas']
   },
   {
     id: 'valle-sagrado',
@@ -600,6 +628,35 @@ export const DESTINATIONS: Destination[] = [
     image: 'https://images.unsplash.com/photo-1590050752117-23a9d7f28243?auto=format&fit=crop&w=800&q=80',
     description: 'El corazón fértil del Tahuantinsuyo, regado por el río Vilcanota y flanqueado por fortalezas como Ollantaytambo y Pisac.',
     altitude: '2,870 msnm',
-    highlights: ['Ollantaytambo', 'Pisac', 'Chinchero', 'Salineras de Maras']
+    highlights: ['Ollantaytambo', 'Pisac', 'Chinchero', 'Salineras de Maras'],
+    tourIds: ['super-valle-sagrado', 'valle-sagrado-tradicional', 'maras-moray-salineras', 'cuatrimotos-valle']
   }
 ];
+
+export const REAL_TESTIMONIALS = [
+  {
+    id: 'test-1',
+    name: 'Claudia y Roberto M.',
+    location: 'Santiago, Chile',
+    rating: 5,
+    comment: 'Viajamos en pareja a Machu Picchu y Humantay. Excelente puntualidad en los recojos de hotel y guías muy preparados. La comunicación por WhatsApp resolvió todas nuestras dudas antes del viaje.',
+    tourTitle: 'Machu Picchu Full Day & Laguna Humantay'
+  },
+  {
+    id: 'test-2',
+    name: 'Mateo Fernández',
+    location: 'Buenos Aires, Argentina',
+    rating: 5,
+    comment: 'Hicimos el Super Valle Sagrado y la Montaña en Cuatrimoto. Todo fue tal como lo describieron, sin costos ocultos y con almuerzo buffet riquísimo en Urubamba.',
+    tourTitle: 'Super Valle Sagrado & Cuatrimotos'
+  },
+  {
+    id: 'test-3',
+    name: 'Sophie & Marc D.',
+    location: 'París, Francia',
+    rating: 5,
+    comment: 'Servicio impecable desde el traslado en el aeropuerto hasta la excursión a Vinicunca. Nos brindaron bastones y asistencia con el tema de la altitud. Totalmente recomendados.',
+    tourTitle: 'Montaña de Colores & Traslados Cusco'
+  }
+];
+

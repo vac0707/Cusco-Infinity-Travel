@@ -31,11 +31,15 @@ export default function DestinationsPage() {
         {/* Destination Cards */}
         <div className="space-y-16">
           {DESTINATIONS.map((dest, index) => {
-            // Find tours associated with this destination
-            const matchingTours = PACKAGES.filter(p => 
-              p.places.some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
-              p.title.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])
-            ).slice(0, 3);
+            // Find tours associated with this destination using exact tourIds
+            const matchingTours = dest.tourIds && dest.tourIds.length > 0
+              ? dest.tourIds
+                  .map(id => PACKAGES.find(p => p.id === id))
+                  .filter((p): p is typeof PACKAGES[0] => Boolean(p))
+              : PACKAGES.filter(p => 
+                  p.places.some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
+                  p.title.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])
+                ).slice(0, 3);
 
             return (
               <article 

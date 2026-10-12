@@ -12,6 +12,7 @@ import { MapPin, Phone, Mail, Instagram, Facebook, ExternalLink, ShieldCheck } f
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [legalModal, setLegalModal] = React.useState<'terminos' | 'politicas' | null>(null);
 
   return (
     <footer className="bg-dark text-white pt-20 pb-12 border-t border-white/10">
@@ -175,9 +176,21 @@ export default function Footer() {
             © {currentYear} Cusco Infinity Travel. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6 text-[11px] tracking-wider">
-            <Link to="/contacto" className="hover:text-white transition-colors">Términos y Condiciones</Link>
+            <button 
+              type="button" 
+              onClick={() => setLegalModal('terminos')} 
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Términos y Condiciones
+            </button>
             <span>•</span>
-            <Link to="/contacto" className="hover:text-white transition-colors">Políticas de Reserva</Link>
+            <button 
+              type="button" 
+              onClick={() => setLegalModal('politicas')} 
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Políticas de Reserva
+            </button>
             <span>•</span>
             <a 
               href={MAPS_URL} 
@@ -190,6 +203,60 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Documentos Legales */}
+      {legalModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLegalModal(null)}
+        >
+          <div 
+            className="bg-white text-dark rounded-sm max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-border relative max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-4 border-b border-border pb-3">
+              <h3 className="text-lg font-light font-heading text-dark">
+                {legalModal === 'terminos' ? 'Términos y Condiciones' : 'Políticas de Reserva y Cancelación'}
+              </h3>
+              <button 
+                onClick={() => setLegalModal(null)} 
+                className="text-muted-foreground hover:text-dark p-1 text-sm font-bold"
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-xs text-dark/80 font-light leading-relaxed space-y-3">
+              {legalModal === 'terminos' ? (
+                <>
+                  <p><strong>1. Identidad y Operación:</strong> Cusco Infinity Travel es una agencia de viajes local formal con base en Cusco, Perú, autorizada para la intermediación y operación de servicios turísticos.</p>
+                  <p><strong>2. Precios y Tarifas:</strong> Todas las tarifas están expresadas en dólares estadounidenses (USD) por persona. Los boletos, ingresos y servicios incluidos se detallan explícitamente en la ficha de cada paquete.</p>
+                  <p><strong>3. Documentación Obligatoria:</strong> El pasajero debe portar su documento de identidad original (DNI para peruanos o Pasaporte original para extranjeros) durante todos los tours arqueológicos.</p>
+                  <p><strong>4. Aclimatación y Salud:</strong> Varios destinos sobrepasan los 4,200 msnm. Es responsabilidad del viajero seguir las recomendaciones de aclimatación y contar con aptitud médica para caminatas de alta montaña.</p>
+                </>
+              ) : (
+                <>
+                  <p><strong>1. Confirmación de Cupos:</strong> Las reservas se confirman mediante comunicación directa y emisión de voucher. Para Machu Picchu, los boletos nominativos están sujetos a la disponibilidad oficial del Ministerio de Cultura.</p>
+                  <p><strong>2. Reprogramaciones:</strong> Notificaciones de cambio de fecha con más de 72 horas de anticipación son procesadas según disponibilidad de transporte y guías.</p>
+                  <p><strong>3. Boletos no Reembolsables:</strong> Los boletos oficiales de trenes (PeruRail / Inca Rail) y los ingresos a Machu Picchu son de carácter personal, intransferible y no reembolsables según las normativas vigentes del estado peruano.</p>
+                  <p><strong>4. Casos Fortuitos:</strong> Ante bloqueos de carreteras o condiciones climáticas extremas, la agencia brindará alternativas de ruta o reprogramación resguardando siempre la seguridad física del viajero.</p>
+                </>
+              )}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <button
+                type="button"
+                onClick={() => setLegalModal(null)}
+                className="bg-dark hover:bg-primary text-white text-xs font-semibold px-5 py-2.5 rounded-sm transition-colors uppercase tracking-wider"
+              >
+                Entendido y Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }
