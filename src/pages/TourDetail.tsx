@@ -21,12 +21,12 @@ import {
   Compass
 } from 'lucide-react';
 
-import { useAgencyData } from '@/context/AgencyDataContext';
 
 export default function TourDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { packages, settings } = useAgencyData();
+  const packages = PACKAGES;
+  const settings = { whatsappNumber: WHATSAPP_NUMBER, whatsappDisplay: WHATSAPP_DISPLAY };
 
   // Find tour by ID
   const tour = packages.find((p) => p.id === id);

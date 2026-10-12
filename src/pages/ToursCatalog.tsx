@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { TOUR_CATEGORIES } from '@/constants';
-import { useAgencyData } from '@/context/AgencyDataContext';
+import { TOUR_CATEGORIES, PACKAGES } from '@/constants';
 import { TourCategorySlug, TourDifficulty } from '@/types';
 import TourCard from '@/components/TourCard';
 import SEOHead from '@/components/SEOHead';
@@ -20,7 +19,7 @@ import {
 
 export default function ToursCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { packages } = useAgencyData();
+  const packages = PACKAGES;
 
   // Filter only active packages for the public catalog
   const activePackages = useMemo(() => {

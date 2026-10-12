@@ -3,12 +3,12 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, User, ShieldAlert, ArrowLeft, KeyRound, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Lock, User, ShieldAlert, ArrowLeft, KeyRound } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const { loginWithEmail, loginWithGoogle, loginAsDemoAdmin, isFirebaseConfigured, isLoading } = useAdminAuth();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const { loginWithEmail, loginWithGoogle, isFirebaseConfigured, isLoading } = useAdminAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
     if (result.success) {
       navigate(from, { replace: true });
     } else {
-      setError(result.error || 'Credenciales inválidas. Usa admin / admin123');
+      setError(result.error || 'Credenciales inválidas. Usa Usuario: admin | Contraseña: admin123');
     }
   };
 
@@ -44,11 +44,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleDemoLogin = () => {
-    loginAsDemoAdmin();
-    navigate('/administracion', { replace: true });
-  };
-
   return (
     <div className="min-h-screen bg-stone-950 flex flex-col justify-center items-center p-4 selection:bg-primary/30">
       <div className="w-full max-w-md bg-stone-900 border border-stone-800 rounded-sm shadow-2xl overflow-hidden p-6 sm:p-8">
@@ -57,7 +52,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-[10px] uppercase font-bold tracking-widest mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>Modo Demostración Activo</span>
+            <span>{!isFirebaseConfigured ? 'Modo Demostración Activo' : 'Panel Administrativo'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-light font-heading text-white tracking-wide">
             CUSCO INFINITY TRAVEL
@@ -68,25 +63,27 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Demo Credentials Box */}
-        <div className="mb-6 bg-stone-950 border border-primary/30 rounded-sm p-4 text-xs text-stone-300">
-          <div className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider mb-2">
-            <KeyRound size={14} />
-            <span>Credenciales de Acceso Demo</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 bg-stone-900/80 p-2.5 rounded-sm border border-stone-800 font-mono text-[11px]">
-            <div>
-              <span className="text-stone-500 block text-[9px] uppercase font-sans">Usuario:</span>
-              <span className="text-emerald-400 font-bold">admin</span>
+        {!isFirebaseConfigured && (
+          <div className="mb-6 bg-stone-950 border border-primary/30 rounded-sm p-4 text-xs text-stone-300">
+            <div className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider mb-2">
+              <KeyRound size={14} />
+              <span>Credenciales de Acceso Demo</span>
             </div>
-            <div>
-              <span className="text-stone-500 block text-[9px] uppercase font-sans">Contraseña:</span>
-              <span className="text-emerald-400 font-bold">admin123</span>
+            <div className="grid grid-cols-2 gap-2 bg-stone-900/80 p-2.5 rounded-sm border border-stone-800 font-mono text-[11px]">
+              <div>
+                <span className="text-stone-500 block text-[9px] uppercase font-sans">Usuario:</span>
+                <span className="text-emerald-400 font-bold">admin</span>
+              </div>
+              <div>
+                <span className="text-stone-500 block text-[9px] uppercase font-sans">Contraseña:</span>
+                <span className="text-emerald-400 font-bold">admin123</span>
+              </div>
             </div>
+            <p className="text-[10px] text-stone-400 mt-2 leading-relaxed">
+              El acceso demo funciona exclusivamente con las credenciales indicadas cuando Firebase está desactivado.
+            </p>
           </div>
-          <p className="text-[10px] text-stone-400 mt-2 leading-relaxed">
-            Acceso temporal para pruebas de diseño y navegación. No requiere conexión a base de datos.
-          </p>
-        </div>
+        )}
 
         {error && (
           <div className="mb-5 p-3 bg-rose-950/40 border border-rose-800 text-rose-300 text-xs rounded-sm flex items-start gap-2.5">
@@ -136,16 +133,6 @@ export default function AdminLoginPage() {
             className="w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-wider h-11 rounded-sm mt-2 transition-all"
           >
             {isSubmitting ? 'Verificando...' : 'Iniciar Sesión'}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleDemoLogin}
-            className="w-full bg-stone-950 border-primary/40 hover:bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider h-11 rounded-sm flex items-center justify-center gap-2"
-          >
-            <Sparkles size={14} />
-            <span>Entrar Directo en Modo Demo</span>
           </Button>
         </form>
 

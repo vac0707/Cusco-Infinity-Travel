@@ -20,7 +20,6 @@ interface AdminAuthContextType {
   isDemoMode: boolean;
   loginWithEmail: (usernameOrEmail: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  loginAsDemoAdmin: () => void;
   logout: () => Promise<void>;
 }
 
@@ -54,27 +53,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           setUser(adminUser);
           localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(adminUser));
         } else {
-          // If no Firebase user, check if logged in via demo session
-          const stored = localStorage.getItem(LOCAL_ADMIN_KEY);
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              if (parsed?.isDemo) {
-                setUser(parsed);
-              } else {
-                setUser(null);
-              }
-            } catch {
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
+          // If Firebase is configured and no user, clear session
+          setUser(null);
+          localStorage.removeItem(LOCAL_ADMIN_KEY);
         }
         setIsLoading(false);
       });
       return () => unsubscribe();
     } else {
+      // Demo mode: check local session
+      const stored = localStorage.getItem(LOCAL_ADMIN_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.isDemo) {
+            setUser(parsed);
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
+      }
       setIsLoading(false);
     }
   }, []);
@@ -82,31 +82,34 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithEmail = async (usernameOrEmail: string, pass: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
 
-    const cleanUser = usernameOrEmail.trim().toLowerCase();
+    const cleanUser = usernameOrEmail.trim();
     const cleanPass = pass.trim();
 
-    // 1. DEMO MODE VALIDATION (Requested by user: admin / admin123)
-    if (
-      (cleanUser === 'admin' && (cleanPass === 'admin123' || cleanPass === 'admin2026')) ||
-      (cleanUser === 'admin@cuscoinfinitytravel.com' && (cleanPass === 'admin123' || cleanPass === 'admin2026')) ||
-      (!isFirebaseConfigured && cleanUser === 'admin' && cleanPass === 'admin123') ||
-      (!isFirebaseConfigured && cleanUser.length >= 3 && cleanPass === 'admin123')
-    ) {
-      const demoUser: AdminUser = {
-        uid: 'demo_admin_root',
-        email: 'admin@cuscoinfinitytravel.com',
-        displayName: 'Administrador Demo (admin)',
-        role: 'admin',
-        isDemo: true
-      };
-      setUser(demoUser);
-      localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(demoUser));
-      setIsLoading(false);
-      return { success: true };
+    // 1. DEMO MODE VALIDATION (Only when Firebase is NOT configured)
+    if (!isFirebaseConfigured) {
+      if (cleanUser === 'admin' && cleanPass === 'admin123') {
+        const demoUser: AdminUser = {
+          uid: 'demo_admin_root',
+          email: 'admin@cuscoinfinitytravel.com',
+          displayName: 'Administrador Demo (admin)',
+          role: 'admin',
+          isDemo: true
+        };
+        setUser(demoUser);
+        localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(demoUser));
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return {
+          success: false,
+          error: 'Credenciales demo incorrectas. Usuario correcto: admin | Contraseña correcta: admin123'
+        };
+      }
     }
 
-    // 2. Real Firebase Auth if configured and provided with an email
-    if (isFirebaseConfigured && auth && cleanUser.includes('@')) {
+    // 2. Real Firebase Auth if configured
+    if (isFirebaseConfigured && auth) {
       try {
         const cred = await signInWithEmailAndPassword(auth, cleanUser, pass);
         const adminUser: AdminUser = {
@@ -130,7 +133,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
     return { 
       success: false, 
-      error: 'Credenciales inválidas. Para el modo Demo usa Usuario: admin | Contraseña: admin123' 
+      error: 'Credenciales inválidas.' 
     };
   };
 
@@ -164,18 +167,6 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginAsDemoAdmin = () => {
-    const adminUser: AdminUser = {
-      uid: 'demo_admin_root',
-      email: 'admin@cuscoinfinitytravel.com',
-      displayName: 'Administrador Demo (admin)',
-      role: 'admin',
-      isDemo: true
-    };
-    setUser(adminUser);
-    localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(adminUser));
-  };
-
   const logout = async () => {
     if (isFirebaseConfigured && auth) {
       try {
@@ -195,10 +186,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: Boolean(user),
         isLoading,
         isFirebaseConfigured,
-        isDemoMode: Boolean(!isFirebaseConfigured || user?.isDemo),
+        isDemoMode: Boolean(!isFirebaseConfigured && user?.isDemo),
         loginWithEmail,
         loginWithGoogle,
-        loginAsDemoAdmin,
         logout
       }}
     >

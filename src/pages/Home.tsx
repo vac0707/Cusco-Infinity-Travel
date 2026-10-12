@@ -32,16 +32,22 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-import { useAgencyData } from '@/context/AgencyDataContext';
-
 export default function Home() {
-  const { packages, testimonials, settings } = useAgencyData();
+  const packages = PACKAGES.filter(p => p.active !== false);
+  const testimonials = REAL_TESTIMONIALS;
+  const settings = {
+    whatsappNumber: WHATSAPP_NUMBER,
+    whatsappDisplay: WHATSAPP_DISPLAY,
+    email: AGENCY_EMAIL,
+    address: AGENCY_ADDRESS,
+    mapsUrl: MAPS_URL
+  };
 
   // Select active featured packages (up to 6)
   const featuredPackages = packages.filter(p => p.featured && p.active !== false).slice(0, 6);
 
   // Active testimonials
-  const activeTestimonials = testimonials.filter(t => t.active !== false).slice(0, 3);
+  const activeTestimonials = testimonials.filter(t => (t as { active?: boolean }).active !== false).slice(0, 3);
 
   const handleContactAdvisor = () => {
     const text = encodeURIComponent(
