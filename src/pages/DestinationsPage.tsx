@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { DESTINATIONS, PACKAGES } from '@/constants';
+import { useAgencyData } from '@/context/AgencyDataContext';
 import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { MapPin, Mountain, ArrowRight, Compass } from 'lucide-react';
 
 export default function DestinationsPage() {
+  const { destinations, packages } = useAgencyData();
+
   return (
     <div className="min-h-screen bg-background pt-28 pb-24">
       <SEOHead 
@@ -30,15 +32,17 @@ export default function DestinationsPage() {
 
         {/* Destination Cards */}
         <div className="space-y-16">
-          {DESTINATIONS.map((dest, index) => {
+          {destinations.map((dest, index) => {
             // Find tours associated with this destination using exact tourIds
             const matchingTours = dest.tourIds && dest.tourIds.length > 0
               ? dest.tourIds
-                  .map(id => PACKAGES.find(p => p.id === id))
-                  .filter((p): p is typeof PACKAGES[0] => Boolean(p))
-              : PACKAGES.filter(p => 
-                  p.places.some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
-                  p.title.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])
+                  .map(id => packages.find(p => p.id === id))
+                  .filter((p): p is typeof packages[0] => Boolean(p && p.active !== false))
+              : packages.filter(p => 
+                  p.active !== false && (
+                    p.places.some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
+                    p.title.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])
+                  )
                 ).slice(0, 3);
 
             return (

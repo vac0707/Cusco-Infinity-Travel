@@ -175,7 +175,7 @@ export default function Footer() {
           <p className="text-[11px] tracking-wider text-center sm:text-left">
             © {currentYear} Cusco Infinity Travel. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-6 text-[11px] tracking-wider">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6 text-[11px] tracking-wider">
             <button 
               type="button" 
               onClick={() => setLegalModal('terminos')} 
@@ -198,8 +198,16 @@ export default function Footer() {
               rel="noopener noreferrer" 
               className="hover:text-white transition-colors flex items-center gap-1"
             >
-              <span>Ver en Google Maps</span>
+              <span>Google Maps</span>
             </a>
+            <span>•</span>
+            <Link 
+              to="/admin" 
+              className="text-primary hover:text-white transition-colors flex items-center gap-1 font-semibold"
+              title="Acceso al panel administrativo de la agencia"
+            >
+              <span>Panel Admin</span>
+            </Link>
           </div>
         </div>
       </div>

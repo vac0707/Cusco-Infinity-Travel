@@ -13,6 +13,13 @@ export interface TourCategory {
   name: string;
   description: string;
   image: string;
+  active?: boolean;
+}
+
+export interface TourModality {
+  name: string;
+  price: number;
+  description?: string;
 }
 
 export interface Package {
@@ -28,10 +35,14 @@ export interface Package {
   image: string;
   gallery?: string[];
   featured?: boolean;
+  active?: boolean;
+  modalities?: TourModality[];
   categories?: TourCategorySlug[];
   recommendations?: string[];
   altitude?: string;
   shortDescription?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Testimonial {
@@ -40,7 +51,10 @@ export interface Testimonial {
   location: string;
   comment: string;
   rating: number;
-  avatar: string;
+  avatar?: string;
+  tourTitle?: string;
+  date?: string;
+  active?: boolean;
 }
 
 export interface Destination {
@@ -51,4 +65,50 @@ export interface Destination {
   altitude?: string;
   highlights?: string[];
   tourIds?: string[];
+}
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface SiteSettings {
+  agencyName: string;
+  slogan: string;
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  email: string;
+  address: string;
+  mapsUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  youtubeUrl?: string;
+  tripAdvisorUrl?: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroBgImage: string;
+  termsAndConditions: string;
+  bookingPolicies: string;
+  aboutUsText?: string;
+  missionText?: string;
+  visionText?: string;
+  faqs?: FaqItem[];
+  currency?: string;
+  exchangeRatePEN?: number;
+  homeSections?: {
+    quizVisible?: boolean;
+    destinationsVisible?: boolean;
+    testimonialsVisible?: boolean;
+    whyUsVisible?: boolean;
+  };
+}
+
+export interface AdminUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  role: 'admin' | 'editor';
+  isDemo?: boolean;
 }

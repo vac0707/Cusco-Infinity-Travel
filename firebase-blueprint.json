@@ -1,0 +1,105 @@
+{
+  "entities": {
+    "Package": {
+      "title": "Package",
+      "description": "Paquete turístico de Cusco Infinity Travel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "duration": { "type": "string", "maxLength": 60 },
+        "price": { "type": "number" },
+        "difficulty": { "type": "string", "enum": ["Fácil", "Moderado", "Desafiante"] },
+        "places": { "type": "array" },
+        "includes": { "type": "array" },
+        "excludes": { "type": "array" },
+        "itinerary": { "type": "array" },
+        "image": { "type": "string", "maxLength": 500 },
+        "gallery": { "type": "array" },
+        "featured": { "type": "boolean" },
+        "active": { "type": "boolean" },
+        "categories": { "type": "array" },
+        "recommendations": { "type": "array" },
+        "altitude": { "type": "string", "maxLength": 60 },
+        "shortDescription": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "price", "duration", "difficulty", "image"]
+    },
+    "Destination": {
+      "title": "Destination",
+      "description": "Destino geográfico o arqueológico de la región Cusco",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 800 },
+        "image": { "type": "string", "maxLength": 500 },
+        "altitude": { "type": "string", "maxLength": 60 },
+        "tourIds": { "type": "array" }
+      },
+      "required": ["id", "name", "image", "description"]
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Testimonio o reseña de viajero verificado",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 100 },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "rating": { "type": "number" },
+        "avatar": { "type": "string", "maxLength": 500 },
+        "date": { "type": "string", "maxLength": 60 },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "name", "comment", "rating"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Configuración institucional y textos de Cusco Infinity Travel",
+      "type": "object",
+      "properties": {
+        "agencyName": { "type": "string", "maxLength": 100 },
+        "whatsappNumber": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "maxLength": 100 },
+        "address": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Administrador autorizado del sistema",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["admin", "editor"] }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/packages/{packageId}": {
+      "schema": "Package",
+      "description": "Catálogo de paquetes turísticos"
+    },
+    "/destinations/{destinationId}": {
+      "schema": "Destination",
+      "description": "Destinos turísticos"
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": "Testimonial",
+      "description": "Testimonios de viajeros"
+    },
+    "/site_settings/{settingId}": {
+      "schema": "SiteSettings",
+      "description": "Configuración general del sitio"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Usuarios administradores autorizados"
+    }
+  }
+}

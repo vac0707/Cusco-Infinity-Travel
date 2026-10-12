@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { PACKAGES, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/constants';
 import SEOHead from '@/components/SEOHead';
 import TourCard from '@/components/TourCard';
+import TourGallery from '@/components/TourGallery';
 import { Button } from '@/components/ui/button';
 import { 
   Clock, 
@@ -17,20 +18,20 @@ import {
   Share2, 
   Calendar,
   ShieldCheck,
-  Compass,
-  Images
+  Compass
 } from 'lucide-react';
+
+import { useAgencyData } from '@/context/AgencyDataContext';
 
 export default function TourDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { packages, settings } = useAgencyData();
 
   // Find tour by ID
-  const tour = PACKAGES.find((p) => p.id === id);
+  const tour = packages.find((p) => p.id === id);
 
   const imagesList = tour ? (tour.gallery && tour.gallery.length > 0 ? tour.gallery : [tour.image]) : [];
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
-  const activeImage = imagesList[selectedImageIndex] || tour?.image || '';
 
   if (!tour) {
     return (
@@ -56,18 +57,19 @@ export default function TourDetail() {
   }
 
   // Related tours (same category or difficulty, excluding current tour)
-  const relatedTours = PACKAGES.filter((p) => {
-    if (p.id === tour.id) return false;
+  const relatedTours = packages.filter((p) => {
+    if (p.id === tour.id || p.active === false) return false;
     const shareCategory = tour.categories && p.categories?.some(c => tour.categories?.includes(c));
     const sameDifficulty = p.difficulty === tour.difficulty;
     return shareCategory || sameDifficulty;
   }).slice(0, 3);
 
   // Personalized WhatsApp booking URL
+  const whatsAppNumberToUse = settings.whatsappNumber || WHATSAPP_NUMBER;
   const whatsAppMessage = encodeURIComponent(
     `Hola, estoy interesado en el paquete ${tour.title} de Cusco Infinity Travel. Me gustaría recibir información y disponibilidad.`
   );
-  const whatsAppUrl = `https://wa.me/51${WHATSAPP_NUMBER}?text=${whatsAppMessage}`;
+  const whatsAppUrl = `https://wa.me/51${whatsAppNumberToUse}?text=${whatsAppMessage}`;
 
   const difficultyColors = {
     'Fácil': 'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -84,7 +86,7 @@ export default function TourDetail() {
       />
 
       {/* Back button & Breadcrumb */}
-      <div className="container mx-auto px-4 sm:px-6 mb-8 pt-4">
+      <div className="container mx-auto px-4 sm:px-6 mb-6 pt-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <button 
             onClick={() => navigate('/tours')}
@@ -106,73 +108,37 @@ export default function TourDetail() {
 
       <div className="container mx-auto px-4 sm:px-6">
         
-        {/* Hero Banner with Multi-Image View */}
-        <div className="relative aspect-[16/9] sm:aspect-[21/9] min-h-[380px] max-h-[560px] rounded-sm overflow-hidden shadow-2xl mb-4 bg-dark">
-          <img 
-            src={activeImage} 
-            alt={`Experiencia ${tour.title} en Cusco`}
-            className="w-full h-full object-cover transition-all duration-700 ease-in-out"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-dark/20" />
-          
-          <div className="absolute bottom-8 left-6 sm:left-10 right-6 sm:right-10 text-white">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-sm border ${difficultyColors[tour.difficulty]}`}>
-                Dificultad {tour.difficulty}
+        {/* Tour Header Banner */}
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-sm border ${difficultyColors[tour.difficulty]}`}>
+              Dificultad {tour.difficulty}
+            </span>
+            <span className="bg-stone-100 text-dark px-3 py-1 text-[10px] uppercase tracking-widest font-semibold rounded-sm border border-stone-200">
+              Duración: {tour.duration}
+            </span>
+            {tour.altitude && (
+              <span className="bg-stone-100 text-dark px-3 py-1 text-[10px] uppercase tracking-widest font-semibold rounded-sm border border-stone-200 hidden sm:inline-block">
+                Altitud: {tour.altitude}
               </span>
-              <span className="bg-white/20 backdrop-blur-md px-3 py-1 text-[10px] uppercase tracking-widest font-semibold rounded-sm">
-                Duración: {tour.duration}
-              </span>
-              {tour.altitude && (
-                <span className="bg-white/20 backdrop-blur-md px-3 py-1 text-[10px] uppercase tracking-widest font-semibold rounded-sm hidden sm:inline-block">
-                  Altitud: {tour.altitude}
-                </span>
-              )}
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-light font-heading leading-tight mb-4">
-              {tour.title}
-            </h1>
-
-            {tour.shortDescription && (
-              <p className="text-xs sm:text-sm text-white/80 font-light max-w-2xl leading-relaxed">
-                {tour.shortDescription}
-              </p>
             )}
           </div>
+
+          <h1 className="text-3xl sm:text-5xl font-light font-heading text-dark leading-tight mb-3">
+            {tour.title}
+          </h1>
+
+          {tour.shortDescription && (
+            <p className="text-sm sm:text-base text-muted-foreground font-light max-w-3xl leading-relaxed">
+              {tour.shortDescription}
+            </p>
+          )}
         </div>
 
-        {/* Gallery Thumbnails Strip (if multiple images exist) */}
-        {imagesList.length > 1 && (
-          <div className="mb-12 flex items-center gap-3 overflow-x-auto pb-2 pt-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-2 font-medium shrink-0">
-              <Images size={15} className="text-primary" />
-              <span className="text-[11px] uppercase tracking-wider">Galería ({imagesList.length}):</span>
-            </div>
-            {imagesList.map((imgUrl, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setSelectedImageIndex(idx)}
-                aria-label={`Ver foto ${idx + 1} de ${tour.title}`}
-                className={`relative w-20 sm:w-24 h-14 sm:h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-all duration-300 ${
-                  selectedImageIndex === idx 
-                    ? 'border-primary ring-2 ring-primary/30 scale-105 shadow-md' 
-                    : 'border-border/80 opacity-70 hover:opacity-100 hover:border-primary/50'
-                }`}
-              >
-                <img 
-                  src={imgUrl} 
-                  alt={`${tour.title} foto ${idx + 1}`} 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-        {imagesList.length <= 1 && <div className="mb-12" />}
+        {/* Interactive Tour Gallery */}
+        <div className="mb-12">
+          <TourGallery images={imagesList} tourTitle={tour.title} />
+        </div>
 
         {/* Content & Sidebar Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

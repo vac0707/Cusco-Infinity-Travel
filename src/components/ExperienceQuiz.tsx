@@ -13,7 +13,8 @@ import {
   ArrowRight, 
   Check, 
   Sparkles,
-  Phone
+  Phone,
+  AlertCircle
 } from 'lucide-react';
 
 interface QuizState {
@@ -58,38 +59,30 @@ export default function ExperienceQuiz() {
     if (step !== 5) return [];
 
     // 1. Filter packages that strictly satisfy hard constraints
-    let eligible = PACKAGES.filter(pkg => {
-      // Budget filter
+    const eligible = PACKAGES.filter(pkg => {
+      // Budget filter:
+      // "economico": strictly <= $40 USD
       if (answers.budget === 'economico' && pkg.price > 40) return false;
-      if (answers.budget === 'moderado' && (pkg.price <= 40 || pkg.price > 70)) return false;
-      if (answers.budget === 'exclusivo' && pkg.price <= 70) return false;
-
-      // Duration filter
+      // "moderado": up to $70 USD (do not exclude economical tours <= 40, but reject > 70)
+      if (answers.budget === 'moderado' && pkg.price > 70) return false;
+      // "exclusivo": any price (integral/premium experiences)
+      
+      // Duration filter:
       if (answers.duration === 'medio-dia' && pkg.duration !== 'Medio Día') return false;
       if (answers.duration === 'un-dia' && pkg.duration !== '1 Día') return false;
+      if (answers.duration === 'varios-dias' && !pkg.duration.toLowerCase().includes('días')) return false;
 
-      // Difficulty filter
+      // Difficulty filter:
       if (answers.difficulty === 'facil' && pkg.difficulty !== 'Fácil') return false;
-      if (answers.difficulty === 'moderado' && pkg.difficulty !== 'Moderado') return false;
+      if (answers.difficulty === 'moderado' && pkg.difficulty === 'Desafiante') return false;
       if (answers.difficulty === 'desafiante' && pkg.difficulty !== 'Desafiante') return false;
 
       return true;
     });
 
-    // If too strict (0 matches due to very niche combination), relax progressively
+    // If no packages strictly qualify, do not recommend incompatible ones!
     if (eligible.length === 0) {
-      eligible = PACKAGES.filter(pkg => {
-        // Enforce budget at minimum if set
-        if (answers.budget === 'economico' && pkg.price > 40) return false;
-        if (answers.budget === 'moderado' && (pkg.price <= 40 || pkg.price > 70)) return false;
-        if (answers.budget === 'exclusivo' && pkg.price <= 70) return false;
-        return true;
-      });
-    }
-
-    // Final fallback to all packages if still empty
-    if (eligible.length === 0) {
-      eligible = PACKAGES;
+      return [];
     }
 
     const scored = eligible.map(pkg => {
@@ -438,74 +431,106 @@ export default function ExperienceQuiz() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recommendations.map(({ pkg, matchReasons }, idx) => (
-              <div 
-                key={pkg.id}
-                className="bg-muted/20 border border-border rounded-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300"
-              >
-                <div>
-                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                    <img 
-                      src={pkg.image} 
-                      alt={pkg.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <span className="bg-metallic text-dark px-2.5 py-0.5 text-[10px] font-bold tracking-wider rounded-full shadow">
-                        $ {pkg.price} USD / per
-                      </span>
-                    </div>
-                    <div className="absolute bottom-2 left-2">
-                      <span className="bg-dark/80 backdrop-blur-sm text-white px-2 py-0.5 text-[9px] uppercase tracking-wider font-semibold rounded-sm">
-                        Top {idx + 1}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-4">
-                    <h5 className="font-heading text-lg font-medium text-dark leading-snug mb-1">
-                      {pkg.title}
-                    </h5>
-                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground uppercase font-semibold mb-3">
-                      <span>{pkg.duration}</span>
-                      <span>•</span>
-                      <span>Dificultad {pkg.difficulty}</span>
-                    </div>
-
-                    {/* Match tags */}
-                    <div className="space-y-1 mb-4">
-                      {matchReasons.slice(0, 2).map((reason, rIdx) => (
-                        <div key={rIdx} className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-sm flex items-center gap-1.5">
-                          <Check size={11} className="text-emerald-600 shrink-0" />
-                          <span className="truncate">{reason}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 pt-0 border-t border-border/50 flex flex-col gap-2 mt-auto">
-                  <Link
-                    to={`/tours/${pkg.id}`}
-                    className="w-full text-center py-2 text-[10px] uppercase tracking-wider font-bold text-dark bg-white border border-border hover:bg-muted transition-colors rounded-sm"
-                  >
-                    Ver Detalles
-                  </Link>
-                  <Button
-                    size="sm"
-                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-[10px] uppercase tracking-wider font-bold rounded-sm flex items-center justify-center gap-1.5"
-                    onClick={() => window.open(getWhatsAppBookingLink(pkg), '_blank')}
-                  >
-                    <Phone size={12} />
-                    Consultar por WhatsApp
-                  </Button>
-                </div>
+          {recommendations.length === 0 ? (
+            <div className="py-12 px-6 text-center bg-stone-50 border border-border rounded-sm">
+              <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={28} />
               </div>
-            ))}
-          </div>
+              <h5 className="font-heading text-xl text-dark mb-2">
+                No encontramos coincidencias exactas con estos criterios
+              </h5>
+              <p className="text-xs sm:text-sm text-muted-foreground font-light max-w-lg mx-auto mb-6 leading-relaxed">
+                Ninguno de nuestros 18 paquetes coincide simultáneamente con el presupuesto estricto, duración y nivel físico elegidos. Puedes ajustar tus preferencias o contactarnos directamente por WhatsApp para diseñar un itinerario a tu medida.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Button
+                  onClick={restartQuiz}
+                  className="bg-primary hover:bg-primary/90 text-white text-xs uppercase tracking-wider font-bold"
+                >
+                  <RotateCcw size={13} className="mr-1.5" />
+                  Modificar Preferencias
+                </Button>
+                <a
+                  href={`https://wa.me/51${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Cusco Infinity Travel, quisiera cotizar un tour personalizado con requerimientos especiales.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs uppercase tracking-wider font-bold rounded-sm shadow-sm"
+                >
+                  <Phone size={13} />
+                  Consultar con Asesor
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {recommendations.map(({ pkg, matchReasons }, idx) => (
+                <div 
+                  key={pkg.id}
+                  className="bg-muted/20 border border-border rounded-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300"
+                >
+                  <div>
+                    <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                      <img 
+                        src={pkg.image} 
+                        alt={pkg.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <span className="bg-metallic text-dark px-2.5 py-0.5 text-[10px] font-bold tracking-wider rounded-full shadow">
+                          $ {pkg.price} USD / per
+                        </span>
+                      </div>
+                      <div className="absolute bottom-2 left-2">
+                        <span className="bg-dark/80 backdrop-blur-sm text-white px-2 py-0.5 text-[9px] uppercase tracking-wider font-semibold rounded-sm">
+                          Top {idx + 1}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <h5 className="font-heading text-lg font-medium text-dark leading-snug mb-1">
+                        {pkg.title}
+                      </h5>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground uppercase font-semibold mb-3">
+                        <span>{pkg.duration}</span>
+                        <span>•</span>
+                        <span>Dificultad {pkg.difficulty}</span>
+                      </div>
+
+                      {/* Match tags */}
+                      <div className="space-y-1 mb-4">
+                        {matchReasons.slice(0, 2).map((reason, rIdx) => (
+                          <div key={rIdx} className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-sm flex items-center gap-1.5">
+                            <Check size={11} className="text-emerald-600 shrink-0" />
+                            <span className="truncate">{reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 pt-0 border-t border-border/50 flex flex-col gap-2 mt-auto">
+                    <Link
+                      to={`/tours/${pkg.id}`}
+                      className="w-full text-center py-2 text-[10px] uppercase tracking-wider font-bold text-dark bg-white border border-border hover:bg-muted transition-colors rounded-sm"
+                    >
+                      Ver Detalles
+                    </Link>
+                    <Button
+                      size="sm"
+                      className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-[10px] uppercase tracking-wider font-bold rounded-sm flex items-center justify-center gap-1.5"
+                      onClick={() => window.open(getWhatsAppBookingLink(pkg), '_blank')}
+                    >
+                      <Phone size={12} />
+                      Consultar por WhatsApp
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-8 pt-6 border-t border-border">
             <p className="text-xs text-muted-foreground mb-3 font-light">

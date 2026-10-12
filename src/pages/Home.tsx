@@ -32,15 +32,23 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+import { useAgencyData } from '@/context/AgencyDataContext';
+
 export default function Home() {
-  // Select featured packages (6 packages)
-  const featuredPackages = PACKAGES.filter(p => p.featured).slice(0, 6);
+  const { packages, testimonials, settings } = useAgencyData();
+
+  // Select active featured packages (up to 6)
+  const featuredPackages = packages.filter(p => p.featured && p.active !== false).slice(0, 6);
+
+  // Active testimonials
+  const activeTestimonials = testimonials.filter(t => t.active !== false).slice(0, 3);
 
   const handleContactAdvisor = () => {
     const text = encodeURIComponent(
       'Hola, deseo conversar con un asesor de Cusco Infinity Travel para planificar mi viaje a Cusco.'
     );
-    window.open(`https://wa.me/51${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+    const num = settings.whatsappNumber || WHATSAPP_NUMBER;
+    window.open(`https://wa.me/51${num}?text=${text}`, '_blank');
   };
 
   return (
@@ -445,7 +453,7 @@ export default function Home() {
 
           {/* Verified Testimonials Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {REAL_TESTIMONIALS.map((t) => (
+            {activeTestimonials.map((t) => (
               <div 
                 key={t.id} 
                 className="bg-white p-6 sm:p-8 border border-border rounded-sm shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
@@ -467,9 +475,11 @@ export default function Home() {
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">
                     {t.location}
                   </span>
-                  <span className="text-[10px] text-primary/80 font-medium block mt-1">
-                    Tour: {t.tourTitle}
-                  </span>
+                  {(t as { tourTitle?: string }).tourTitle && (
+                    <span className="text-[10px] text-primary/80 font-medium block mt-1">
+                      Tour: {(t as { tourTitle?: string }).tourTitle}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PACKAGES, TOUR_CATEGORIES } from '@/constants';
+import { TOUR_CATEGORIES } from '@/constants';
+import { useAgencyData } from '@/context/AgencyDataContext';
 import { TourCategorySlug, TourDifficulty } from '@/types';
 import TourCard from '@/components/TourCard';
 import SEOHead from '@/components/SEOHead';
@@ -19,13 +20,28 @@ import {
 
 export default function ToursCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { packages } = useAgencyData();
+
+  // Filter only active packages for the public catalog
+  const activePackages = useMemo(() => {
+    return packages.filter(p => p.active !== false);
+  }, [packages]);
+
+  // Compute dynamic price boundary from packages
+  const minAvailablePrice = useMemo(() => {
+    return activePackages.length > 0 ? Math.min(...activePackages.map(p => p.price)) : 10;
+  }, [activePackages]);
+
+  const maxAvailablePrice = useMemo(() => {
+    return activePackages.length > 0 ? Math.max(...activePackages.map(p => p.price)) : 300;
+  }, [activePackages]);
 
   // Read URL params
   const initialCategory = (searchParams.get('categoria') as TourCategorySlug) || 'todos';
   const initialDuration = searchParams.get('duracion') || 'todas';
   const initialDifficulty = searchParams.get('dificultad') || 'todas';
   const initialQuery = searchParams.get('q') || '';
-  const initialPrice = searchParams.get('precio') ? Number(searchParams.get('precio')) : 300;
+  const initialPrice = searchParams.get('precio') ? Number(searchParams.get('precio')) : maxAvailablePrice;
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
@@ -40,14 +56,14 @@ export default function ToursCatalog() {
     const dur = searchParams.get('duracion') || 'todas';
     const dif = searchParams.get('dificultad') || 'todas';
     const q = searchParams.get('q') || '';
-    const pr = searchParams.get('precio') ? Number(searchParams.get('precio')) : 300;
+    const pr = searchParams.get('precio') ? Number(searchParams.get('precio')) : maxAvailablePrice;
 
     setSelectedCategory(cat);
     setSelectedDuration(dur);
     setSelectedDifficulty(dif);
     setSearchQuery(q);
     setMaxPrice(pr);
-  }, [searchParams]);
+  }, [searchParams, maxAvailablePrice]);
 
   const updateUrlParams = (updates: Record<string, string | null>) => {
     const newParams = new URLSearchParams(searchParams);
@@ -83,7 +99,7 @@ export default function ToursCatalog() {
 
   const handlePriceChange = (price: number) => {
     setMaxPrice(price);
-    updateUrlParams({ precio: price < 300 ? price.toString() : null });
+    updateUrlParams({ precio: price < maxAvailablePrice ? price.toString() : null });
   };
 
   const resetFilters = () => {
@@ -91,7 +107,7 @@ export default function ToursCatalog() {
     setSelectedCategory('todos');
     setSelectedDuration('todas');
     setSelectedDifficulty('todas');
-    setMaxPrice(300);
+    setMaxPrice(maxAvailablePrice);
     setSearchParams({});
   };
 
@@ -100,11 +116,11 @@ export default function ToursCatalog() {
     selectedCategory !== 'todos' || 
     selectedDuration !== 'todas' || 
     selectedDifficulty !== 'todas' || 
-    maxPrice < 300;
+    maxPrice < maxAvailablePrice;
 
-  // Filter the full 18 packages deterministically
+  // Filter active packages deterministically
   const filteredPackages = useMemo(() => {
-    return PACKAGES.filter((tour) => {
+    return activePackages.filter((tour) => {
       // 1. Text search
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -162,7 +178,7 @@ export default function ToursCatalog() {
             Tours en <span className="italic text-primary">Cusco</span>
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground font-light leading-relaxed">
-            Descubre todos nuestros {PACKAGES.length} paquetes disponibles. Filtra por categoría, duración, dificultad o presupuesto y accede al detalle completo de cada itinerario.
+            Descubre todos nuestros {activePackages.length} paquetes disponibles. Filtra por categoría, duración, dificultad o presupuesto y accede al detalle completo de cada itinerario.
           </p>
         </div>
 
@@ -192,7 +208,7 @@ export default function ToursCatalog() {
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
               <span className="text-xs text-muted-foreground font-light">
-                Mostrando <strong className="text-dark font-semibold">{filteredPackages.length}</strong> de {PACKAGES.length} tours
+                Mostrando <strong className="text-dark font-semibold">{filteredPackages.length}</strong> de {activePackages.length} tours
               </span>
 
               {isFiltered && (
@@ -225,10 +241,10 @@ export default function ToursCatalog() {
                     : 'bg-muted/40 text-dark/70 hover:bg-muted border border-border/60'
                 }`}
               >
-                Todas ({PACKAGES.length})
+                Todas ({activePackages.length})
               </button>
               {TOUR_CATEGORIES.map((cat) => {
-                const count = PACKAGES.filter(p => p.categories?.includes(cat.id)).length;
+                const count = activePackages.filter(p => p.categories?.includes(cat.id)).length;
                 return (
                   <button
                     key={cat.id}
@@ -297,16 +313,16 @@ export default function ToursCatalog() {
               </div>
               <input
                 type="range"
-                min="15"
-                max="300"
+                min={minAvailablePrice}
+                max={maxAvailablePrice}
                 step="5"
                 value={maxPrice}
                 onChange={(e) => handlePriceChange(Number(e.target.value))}
                 className="w-full accent-primary cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-muted-foreground mt-1 font-light">
-                <span>$15 USD</span>
-                <span>$300 USD</span>
+                <span>${minAvailablePrice} USD</span>
+                <span>${maxAvailablePrice} USD</span>
               </div>
             </div>
           </div>
