@@ -89,6 +89,50 @@ export default function AdminSettingsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const validateBackupData = (data: any) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('El archivo JSON no tiene un formato de objeto válido.');
+    }
+
+    const collections = [
+      { key: 'packages', name: 'Paquetes Turísticos', idField: 'id', titleField: 'title' },
+      { key: 'destinations', name: 'Destinos', idField: 'id', titleField: 'name' },
+      { key: 'categories', name: 'Categorías', idField: 'id', titleField: 'name' },
+      { key: 'testimonials', name: 'Testimonios', idField: 'id', titleField: 'name' }
+    ];
+
+    for (const col of collections) {
+      if (!data[col.key] || !Array.isArray(data[col.key])) {
+        throw new Error(`La colección "${col.name}" (${col.key}) falta o no es un arreglo válido.`);
+      }
+
+      const ids = new Set<string>();
+      for (let i = 0; i < data[col.key].length; i++) {
+        const item = data[col.key][i];
+        if (!item || typeof item !== 'object') {
+          throw new Error(`Registro inválido en la colección "${col.name}" en el índice ${i}.`);
+        }
+
+        const id = item[col.idField];
+        if (!id || typeof id !== 'string' || !id.trim()) {
+          throw new Error(`Registro incompleto en "${col.name}" en el índice ${i}: falta el identificador (${col.idField}).`);
+        }
+
+        if (ids.has(id)) {
+          throw new Error(`ID duplicado detectado en "${col.name}": el identificador "${id}" aparece más de una vez.`);
+        }
+        ids.add(id);
+
+        const title = item[col.titleField];
+        if (!title || typeof title !== 'string' || !title.trim()) {
+          throw new Error(`Registro incompleto en "${col.name}" con ID "${id}": falta el campo obligatorio (${col.titleField}).`);
+        }
+      }
+    }
+
+    return true;
+  };
+
   // Import JSON Backup - Step 1: Read and Validate file, open preview modal
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,26 +144,8 @@ export default function AdminSettingsPage() {
       try {
         const parsed = JSON.parse(event.target?.result as string);
         
-        // Strict structure validation
-        if (!parsed || typeof parsed !== 'object') {
-          throw new Error('El archivo JSON no tiene un formato válido.');
-        }
-
-        if (!parsed.packages || !Array.isArray(parsed.packages)) {
-          throw new Error('El archivo JSON no contiene la colección de paquetes turísticos (packages).');
-        }
-
-        if (!parsed.destinations || !Array.isArray(parsed.destinations)) {
-          throw new Error('El archivo JSON no contiene la colección de destinos (destinations).');
-        }
-
-        if (!parsed.categories || !Array.isArray(parsed.categories)) {
-          throw new Error('El archivo JSON no contiene la colección de categorías (categories).');
-        }
-
-        if (!parsed.testimonials || !Array.isArray(parsed.testimonials)) {
-          throw new Error('El archivo JSON no contiene la colección de testimonios (testimonials).');
-        }
+        // Comprehensive internal data & structure validation
+        validateBackupData(parsed);
 
         // Set pending data and open preview modal
         setPendingImportData(parsed);

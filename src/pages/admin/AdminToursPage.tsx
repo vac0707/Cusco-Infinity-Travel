@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAgencyData } from '@/context/AgencyDataContext';
 import { Package, TourDifficulty, TourCategorySlug, TourModality } from '@/types';
-import { TOUR_CATEGORIES, WHATSAPP_NUMBER } from '@/constants';
+import { WHATSAPP_NUMBER } from '@/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TourGallery from '@/components/TourGallery';
@@ -90,7 +90,8 @@ export default function AdminToursPage() {
     updatePackage, 
     deletePackage, 
     togglePackageActive, 
-    togglePackageFeatured 
+    togglePackageFeatured,
+    categories 
   } = useAgencyData();
 
   const [search, setSearch] = useState('');
@@ -102,6 +103,7 @@ export default function AdminToursPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTour, setCurrentTour] = useState<Package>(EMPTY_PACKAGE);
   const [activeTab, setActiveTab] = useState<'general' | 'modalities' | 'gallery' | 'itinerary' | 'includes'>('general');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Live Preview Modal
   const [previewTour, setPreviewTour] = useState<Package | null>(null);
@@ -176,7 +178,11 @@ export default function AdminToursPage() {
 
   const handleSaveTour = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentTour.title.trim()) return;
+    setErrorMessage(null);
+    if (!currentTour.title.trim()) {
+      setErrorMessage('El título del tour es obligatorio.');
+      return;
+    }
 
     if (!currentTour.id.trim()) {
       currentTour.id = currentTour.title
@@ -185,18 +191,22 @@ export default function AdminToursPage() {
         .replace(/(^-|-$)+/g, '');
     }
 
-    if (isEditing) {
-      await updatePackage(currentTour.id, currentTour);
-      setSaveSuccessMsg('¡Tour actualizado con éxito!');
-    } else {
-      await addPackage(currentTour);
-      setSaveSuccessMsg('¡Nuevo tour creado con éxito!');
-    }
+    try {
+      if (isEditing) {
+        await updatePackage(currentTour.id, currentTour);
+        setSaveSuccessMsg('¡Tour actualizado con éxito!');
+      } else {
+        await addPackage(currentTour);
+        setSaveSuccessMsg('¡Nuevo tour creado con éxito!');
+      }
 
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setSaveSuccessMsg(null);
-    }, 1000);
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSaveSuccessMsg(null);
+      }, 1000);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+    }
   };
 
   const confirmDelete = async () => {
@@ -394,7 +404,7 @@ export default function AdminToursPage() {
             className="w-full h-10 px-3 text-xs bg-white border border-stone-200 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="todos">Todas las categorías</option>
-            {TOUR_CATEGORIES.map(cat => (
+            {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
@@ -662,6 +672,13 @@ export default function AdminToursPage() {
                 </div>
               )}
 
+              {errorMessage && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-sm flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               {/* TAB 1: General */}
               {activeTab === 'general' && (
                 <div className="space-y-4">
@@ -777,7 +794,7 @@ export default function AdminToursPage() {
                       Categorías Asociadas
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {TOUR_CATEGORIES.map(cat => {
+                      {categories.map(cat => {
                         const isSelected = currentTour.categories?.includes(cat.id);
                         return (
                           <button

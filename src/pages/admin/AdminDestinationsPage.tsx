@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAgencyData } from '@/context/AgencyDataContext';
 import { Destination, TourCategorySlug, TourCategory } from '@/types';
-import { TOUR_CATEGORIES } from '@/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 

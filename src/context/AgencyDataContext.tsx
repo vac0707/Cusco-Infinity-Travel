@@ -255,6 +255,9 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
 
   // Operations for Packages
   const addPackage = useCallback(async (newPkg: Package) => {
+    if (packages.some(p => p.id === newPkg.id)) {
+      throw new Error(`Ya existe un paquete turístico con el ID "${newPkg.id}". Los identificadores deben ser únicos.`);
+    }
     setPackages(prev => [newPkg, ...prev]);
 
     if (isFirebaseConfigured && db) {
@@ -264,13 +267,13 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         handleFirestoreError(err, OperationType.WRITE, `packages/${newPkg.id}`);
       }
     }
-  }, []);
+  }, [packages]);
 
   const updatePackage = useCallback(async (id: string, updates: Partial<Package>) => {
     let updatedItem: Package | undefined;
     setPackages(prev => prev.map(p => {
       if (p.id === id) {
-        updatedItem = { ...p, ...updates, updatedAt: new Date().toISOString() };
+        updatedItem = { ...p, ...updates, id, updatedAt: new Date().toISOString() }; // Ensure ID is preserved
         return updatedItem;
       }
       return p;
@@ -313,6 +316,9 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
 
   // Operations for Destinations
   const addDestination = useCallback(async (newDest: Destination) => {
+    if (destinations.some(d => d.id === newDest.id)) {
+      throw new Error(`Ya existe un destino con el ID "${newDest.id}". Los identificadores deben ser únicos.`);
+    }
     setDestinations(prev => [...prev, newDest]);
 
     if (isFirebaseConfigured && db) {
@@ -322,13 +328,13 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         handleFirestoreError(err, OperationType.WRITE, `destinations/${newDest.id}`);
       }
     }
-  }, []);
+  }, [destinations]);
 
   const updateDestination = useCallback(async (id: string, updates: Partial<Destination>) => {
     let updatedDest: Destination | undefined;
     setDestinations(prev => prev.map(d => {
       if (d.id === id) {
-        updatedDest = { ...d, ...updates };
+        updatedDest = { ...d, ...updates, id }; // Ensure ID preserved
         return updatedDest;
       }
       return d;
@@ -357,6 +363,9 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
 
   // Operations for Categories
   const addCategory = useCallback(async (newCat: TourCategory) => {
+    if (categories.some(c => c.id === newCat.id)) {
+      throw new Error(`Ya existe una categoría con el ID "${newCat.id}". Los identificadores deben ser únicos.`);
+    }
     setCategories(prev => [...prev, newCat]);
 
     if (isFirebaseConfigured && db) {
@@ -366,13 +375,13 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         handleFirestoreError(err, OperationType.WRITE, `categories/${newCat.id}`);
       }
     }
-  }, []);
+  }, [categories]);
 
   const updateCategory = useCallback(async (id: string, updates: Partial<TourCategory>) => {
     let updatedCat: TourCategory | undefined;
     setCategories(prev => prev.map(c => {
       if (c.id === id) {
-        updatedCat = { ...c, ...updates };
+        updatedCat = { ...c, ...updates, id }; // Ensure ID preserved
         return updatedCat;
       }
       return c;
@@ -388,6 +397,11 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const deleteCategory = useCallback(async (id: string) => {
+    const isUsedInPackages = packages.some(p => p.categories?.includes(id) || (p as any).category === id);
+    if (isUsedInPackages) {
+      throw new Error(`No se puede eliminar la categoría "${id}" porque está siendo utilizada por uno o más paquetes turísticos.`);
+    }
+
     setCategories(prev => prev.filter(c => c.id !== id));
 
     if (isFirebaseConfigured && db) {
@@ -397,7 +411,7 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
         handleFirestoreError(err, OperationType.DELETE, `categories/${id}`);
       }
     }
-  }, []);
+  }, [packages]);
 
   // Operations for Testimonials
   const addTestimonial = useCallback(async (newTest: Testimonial) => {
