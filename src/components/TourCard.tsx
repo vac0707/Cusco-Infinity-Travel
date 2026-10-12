@@ -16,7 +16,11 @@ export default function TourCard({ tour }: TourCardProps) {
   };
 
   return (
-    <article className="luxury-card group flex flex-col h-full bg-white border border-border/80 rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+    <Link
+      to={`/tours/${tour.id}`}
+      aria-label={`Ver detalles del tour ${tour.title}`}
+      className="luxury-card group flex flex-col h-full bg-white border border-border/80 rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer text-left"
+    >
       {/* Image container */}
       <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-muted">
         <img 
@@ -87,15 +91,14 @@ export default function TourCard({ tour }: TourCardProps) {
             )}
           </div>
 
-          <Link
-            to={`/tours/${tour.id}`}
-            className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary hover:text-dark transition-colors flex items-center gap-1 group/btn"
+          <div
+            className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary group-hover:text-dark transition-colors flex items-center gap-1"
           >
             <span>Ver Experiencia</span>
-            <ChevronRight size={13} className="transition-transform group-hover/btn:translate-x-1" />
-          </Link>
+            <ChevronRight size={13} className="transition-transform group-hover:translate-x-1" />
+          </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
