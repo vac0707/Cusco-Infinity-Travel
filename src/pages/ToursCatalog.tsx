@@ -1,10 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAgencyData } from '@/context/AgencyDataContext';
+import { TourCategorySlug } from '@/types';
+import SEOHead from '@/components/SEOHead';
+import TourCard from '@/components/TourCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { 
+  Search, 
+  X, 
+  RotateCcw, 
+  Tag, 
+  Clock, 
+  Activity, 
+  DollarSign 
+} from 'lucide-react';
 
 export default function ToursCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { packages } = useAgencyData();
+  const { packages, categories } = useAgencyData();
 
   // Filter only active packages for the public catalog
   const activePackages = useMemo(() => {
@@ -32,7 +46,6 @@ export default function ToursCatalog() {
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>(initialDifficulty);
   const [maxPrice, setMaxPrice] = useState<number>(initialPrice);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Sync with searchParams if changed from outside
   useEffect(() => {
@@ -109,7 +122,7 @@ export default function ToursCatalog() {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = tour.title.toLowerCase().includes(query);
-        const matchesPlaces = tour.places.some(p => p.toLowerCase().includes(query));
+        const matchesPlaces = (tour.places || []).some(p => p.toLowerCase().includes(query));
         const matchesDescription = tour.shortDescription?.toLowerCase().includes(query);
         if (!matchesTitle && !matchesPlaces && !matchesDescription) return false;
       }
@@ -142,7 +155,7 @@ export default function ToursCatalog() {
 
       return true;
     });
-  }, [searchQuery, selectedCategory, selectedDuration, selectedDifficulty, maxPrice]);
+  }, [activePackages, searchQuery, selectedCategory, selectedDuration, selectedDifficulty, maxPrice]);
 
   return (
     <div className="min-h-screen bg-background pt-28 pb-24">
@@ -227,8 +240,8 @@ export default function ToursCatalog() {
               >
                 Todas ({activePackages.length})
               </button>
-              {TOUR_CATEGORIES.map((cat) => {
-                const count = activePackages.filter(p => p.categories?.includes(cat.id)).length;
+              {(categories || []).map((cat) => {
+                const count = activePackages.filter(p => p.categories?.includes(cat.id as TourCategorySlug)).length;
                 return (
                   <button
                     key={cat.id}

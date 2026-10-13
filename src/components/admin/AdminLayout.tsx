@@ -22,6 +22,7 @@ import {
   Sparkles,
   Layers
 } from 'lucide-react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AdminLayout() {
   const { user, logout, isFirebaseConfigured, isDemoMode } = useAdminAuth();
@@ -324,7 +325,9 @@ export default function AdminLayout() {
 
         {/* Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <Outlet />
+          <ErrorBoundary fallbackTitle="Inconveniente al cargar este módulo administrativo">
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

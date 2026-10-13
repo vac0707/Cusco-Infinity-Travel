@@ -1,4 +1,22 @@
+import React from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAgencyData } from '@/context/AgencyDataContext';
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/constants';
+import SEOHead from '@/components/SEOHead';
+import TourGallery from '@/components/TourGallery';
+import TourCard from '@/components/TourCard';
+import { Button } from '@/components/ui/button';
+import { 
+  AlertCircle, 
+  ArrowLeft, 
+  MapPin, 
+  Clock, 
+  Check, 
+  Minus, 
+  Compass, 
+  Phone, 
+  ShieldCheck 
+} from 'lucide-react';
 
 export default function TourDetail() {
   const { id } = useParams<{ id: string }>();
@@ -7,8 +25,6 @@ export default function TourDetail() {
 
   // Find tour by ID
   const tour = packages.find((p) => p.id === id);
-
-  const imagesList = tour ? (tour.gallery && tour.gallery.length > 0 ? tour.gallery : [tour.image]) : [];
 
   if (!tour) {
     return (
@@ -33,26 +49,36 @@ export default function TourDetail() {
     );
   }
 
+  const imagesList = (tour.gallery && tour.gallery.length > 0) ? tour.gallery : (tour.image ? [tour.image] : []);
+
   // Related tours (same category or difficulty, excluding current tour)
   const relatedTours = packages.filter((p) => {
     if (p.id === tour.id || p.active === false) return false;
-    const shareCategory = tour.categories && p.categories?.some(c => tour.categories?.includes(c));
+    const shareCategory = tour.categories && p.categories && p.categories.some(c => tour.categories?.includes(c));
     const sameDifficulty = p.difficulty === tour.difficulty;
     return shareCategory || sameDifficulty;
   }).slice(0, 3);
 
   // Personalized WhatsApp booking URL
-  const whatsAppNumberToUse = settings.whatsappNumber || WHATSAPP_NUMBER;
+  const whatsAppNumberToUse = (settings && settings.whatsappNumber) || WHATSAPP_NUMBER;
+  const whatsAppDisplayToUse = (settings && settings.whatsappDisplay) || WHATSAPP_DISPLAY;
   const whatsAppMessage = encodeURIComponent(
     `Hola, estoy interesado en el paquete ${tour.title} de Cusco Infinity Travel. Me gustaría recibir información y disponibilidad.`
   );
   const whatsAppUrl = `https://wa.me/51${whatsAppNumberToUse}?text=${whatsAppMessage}`;
 
-  const difficultyColors = {
+  const difficultyColors: Record<string, string> = {
     'Fácil': 'bg-emerald-50 text-emerald-800 border-emerald-200',
     'Moderado': 'bg-amber-50 text-amber-800 border-amber-200',
     'Desafiante': 'bg-rose-50 text-rose-800 border-rose-200'
   };
+  const diffClass = (tour.difficulty && difficultyColors[tour.difficulty]) || 'bg-stone-50 text-stone-800 border-stone-200';
+
+  const places = tour.places || [];
+  const itinerary = tour.itinerary || [];
+  const includes = tour.includes || [];
+  const excludes = tour.excludes || [];
+  const recommendations = tour.recommendations || [];
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-24">
@@ -88,8 +114,8 @@ export default function TourDetail() {
         {/* Tour Header Banner */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-3">
-            <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-sm border ${difficultyColors[tour.difficulty]}`}>
-              Dificultad {tour.difficulty}
+            <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-sm border ${diffClass}`}>
+              Dificultad {tour.difficulty || 'Moderado'}
             </span>
             <span className="bg-stone-100 text-dark px-3 py-1 text-[10px] uppercase tracking-widest font-semibold rounded-sm border border-stone-200">
               Duración: {tour.duration}
@@ -124,100 +150,106 @@ export default function TourDetail() {
           <div className="lg:col-span-8 space-y-12">
             
             {/* Visited places */}
-            <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
-              <h2 className="text-xs uppercase tracking-[0.25em] font-bold text-primary mb-4 flex items-center gap-2">
-                <MapPin size={16} />
-                Lugares y Atractivos Visitados
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {tour.places.map((place, i) => (
-                  <span 
-                    key={i} 
-                    className="px-3.5 py-1.5 bg-muted/40 border border-border/80 text-dark text-xs font-medium rounded-full"
-                  >
-                    {place}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Detailed Itinerary */}
-            <div className="bg-white p-6 sm:p-10 rounded-sm border border-border shadow-sm">
-              <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
-                <Clock size={20} className="text-primary" />
-                <div>
-                  <h2 className="text-2xl font-light font-heading text-dark">
-                    Itinerario Detallado
-                  </h2>
-                  <p className="text-xs text-muted-foreground font-light">
-                    Cronograma estimado sujeto a condiciones de clima y tráfico
-                  </p>
+            {places.length > 0 && (
+              <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
+                <h2 className="text-xs uppercase tracking-[0.25em] font-bold text-primary mb-4 flex items-center gap-2">
+                  <MapPin size={16} />
+                  Lugares y Atractivos Visitados
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {places.map((place, i) => (
+                    <span 
+                      key={i} 
+                      className="px-3.5 py-1.5 bg-muted/40 border border-border/80 text-dark text-xs font-medium rounded-full"
+                    >
+                      {place}
+                    </span>
+                  ))}
                 </div>
               </div>
+            )}
 
-              <div className="space-y-6 relative pl-6">
-                <div className="absolute left-[7px] top-2 bottom-2 w-[1.5px] bg-primary/20" />
-                {tour.itinerary.map((step, idx) => (
-                  <div key={idx} className="relative group">
-                    <div className="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-white border-2 border-primary group-hover:scale-125 transition-transform" />
-                    <p className="text-xs sm:text-sm text-dark font-light leading-relaxed pl-2">
-                      {step}
+            {/* Detailed Itinerary */}
+            {itinerary.length > 0 && (
+              <div className="bg-white p-6 sm:p-10 rounded-sm border border-border shadow-sm">
+                <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
+                  <Clock size={20} className="text-primary" />
+                  <div>
+                    <h2 className="text-2xl font-light font-heading text-dark">
+                      Itinerario Detallado
+                    </h2>
+                    <p className="text-xs text-muted-foreground font-light">
+                      Cronograma estimado sujeto a condiciones de clima y tráfico
                     </p>
                   </div>
-                ))}
+                </div>
+
+                <div className="space-y-6 relative pl-6">
+                  <div className="absolute left-[7px] top-2 bottom-2 w-[1.5px] bg-primary/20" />
+                  {itinerary.map((step, idx) => (
+                    <div key={idx} className="relative group">
+                      <div className="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-white border-2 border-primary group-hover:scale-125 transition-transform" />
+                      <p className="text-xs sm:text-sm text-dark font-light leading-relaxed pl-2">
+                        {step}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Includes & Excludes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Includes */}
-              <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
-                <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-emerald-800 mb-6 flex items-center gap-2">
-                  <Check size={16} className="text-emerald-600" />
-                  Servicios Incluidos
-                </h3>
-                <ul className="space-y-3.5">
-                  {tour.includes.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-dark/90 font-light leading-relaxed">
-                      <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} />
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {(includes.length > 0 || excludes.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                {/* Includes */}
+                <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
+                  <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-emerald-800 mb-6 flex items-center gap-2">
+                    <Check size={16} className="text-emerald-600" />
+                    Servicios Incluidos
+                  </h3>
+                  <ul className="space-y-3.5">
+                    {includes.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-dark/90 font-light leading-relaxed">
+                        <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check size={11} />
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              {/* Excludes */}
-              <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
-                <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-muted-foreground mb-6 flex items-center gap-2">
-                  <Minus size={16} className="text-muted-foreground" />
-                  No Incluye
-                </h3>
-                <ul className="space-y-3.5">
-                  {tour.excludes.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground font-light leading-relaxed">
-                      <span className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 mt-0.5">
-                        <Minus size={11} />
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {/* Excludes */}
+                <div className="bg-white p-6 sm:p-8 rounded-sm border border-border shadow-sm">
+                  <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-muted-foreground mb-6 flex items-center gap-2">
+                    <Minus size={16} className="text-muted-foreground" />
+                    No Incluye
+                  </h3>
+                  <ul className="space-y-3.5">
+                    {excludes.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground font-light leading-relaxed">
+                        <span className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 mt-0.5">
+                          <Minus size={11} />
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            </div>
+              </div>
+            )}
 
             {/* Traveler Recommendations */}
-            {tour.recommendations && tour.recommendations.length > 0 && (
+            {recommendations.length > 0 && (
               <div className="bg-[#FAF8F2] p-6 sm:p-8 rounded-sm border border-primary/20 shadow-sm">
                 <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-primary mb-4 flex items-center gap-2">
                   <Compass size={16} />
                   Recomendaciones para el Viajero
                 </h3>
                 <ul className="space-y-2.5">
-                  {tour.recommendations.map((rec, idx) => (
+                  {recommendations.map((rec, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-dark/80 font-light">
                       <span className="text-primary font-bold mt-0.5">•</span>
                       <span>{rec}</span>
@@ -257,7 +289,7 @@ export default function TourDetail() {
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/40">
                   <span className="text-muted-foreground">Dificultad:</span>
-                  <span className="font-semibold text-dark">{tour.difficulty}</span>
+                  <span className="font-semibold text-dark">{tour.difficulty || 'Moderado'}</span>
                 </div>
                 {tour.altitude && (
                   <div className="flex justify-between py-1.5 border-b border-border/40">
@@ -284,7 +316,7 @@ export default function TourDetail() {
 
                 <div className="text-center">
                   <p className="text-[11px] text-muted-foreground font-light">
-                    Respuesta rápida por nuestro equipo en Cusco: <strong className="text-dark">{WHATSAPP_DISPLAY}</strong>
+                    Respuesta rápida por nuestro equipo en Cusco: <strong className="text-dark">{whatsAppDisplayToUse}</strong>
                   </p>
                 </div>
               </div>

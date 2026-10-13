@@ -3,17 +3,21 @@ import { Link } from 'react-router-dom';
 import { Package } from '@/types';
 import { Clock, Mountain, ChevronRight, MapPin } from 'lucide-react';
 
-interface TourCardProps {
+export interface TourCardProps {
+  key?: React.Key;
   tour: Package;
   showCategoryBadge?: boolean;
 }
 
 export default function TourCard({ tour }: TourCardProps) {
-  const difficultyColors = {
+  const difficultyColors: Record<string, string> = {
     'Fácil': 'bg-emerald-50 text-emerald-800 border-emerald-200/60',
     'Moderado': 'bg-amber-50 text-amber-800 border-amber-200/60',
     'Desafiante': 'bg-rose-50 text-rose-800 border-rose-200/60'
   };
+
+  const diffBadgeClass = (tour.difficulty && difficultyColors[tour.difficulty]) || 'bg-stone-50 text-stone-800 border-stone-200/60';
+  const placesText = (tour.places && tour.places.length > 0) ? tour.places.join(' • ') : 'Cusco y alrededores';
 
   return (
     <Link
@@ -42,8 +46,8 @@ export default function TourCard({ tour }: TourCardProps) {
 
         {/* Difficulty badge */}
         <div className="absolute top-4 left-4 z-10">
-          <span className={`px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold rounded-sm border backdrop-blur-sm ${difficultyColors[tour.difficulty]}`}>
-            {tour.difficulty}
+          <span className={`px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold rounded-sm border backdrop-blur-sm ${diffBadgeClass}`}>
+            {tour.difficulty || 'Moderado'}
           </span>
         </div>
 
@@ -71,7 +75,7 @@ export default function TourCard({ tour }: TourCardProps) {
           <div className="flex items-start gap-2 text-xs text-dark/70 font-light">
             <MapPin size={13} className="text-primary shrink-0 mt-0.5" />
             <p className="line-clamp-1 text-[11px] text-muted-foreground">
-              {tour.places.join(' • ')}
+              {placesText}
             </p>
           </div>
         </div>

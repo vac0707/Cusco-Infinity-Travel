@@ -6,10 +6,11 @@ export type TourCategorySlug =
   | 'naturaleza-montanas' 
   | 'aventura' 
   | 'experiencias-especiales' 
-  | 'traslados-servicios';
+  | 'traslados-servicios'
+  | (string & {});
 
 export interface TourCategory {
-  id: TourCategorySlug;
+  id: string;
   name: string;
   description: string;
   image: string;
@@ -37,7 +38,7 @@ export interface Package {
   featured?: boolean;
   active?: boolean;
   modalities?: TourModality[];
-  categories?: TourCategorySlug[];
+  categories?: (TourCategorySlug | string)[];
   recommendations?: string[];
   altitude?: string;
   shortDescription?: string;

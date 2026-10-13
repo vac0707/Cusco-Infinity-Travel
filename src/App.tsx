@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop';
 import { AgencyDataProvider } from './context/AgencyDataContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import AdminRoute from './components/admin/AdminRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy loaded public pages
 const Home = lazy(() => import('./pages/Home'));
@@ -53,8 +54,9 @@ function AppContent() {
       {!isAdminRoute && <Navbar />}
 
       <main className="flex-1">
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/tours" element={<ToursCatalog />} />
@@ -111,7 +113,8 @@ function AppContent() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-      </main>
+      </ErrorBoundary>
+    </main>
 
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <WhatsAppButton />}

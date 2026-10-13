@@ -93,7 +93,20 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   const [packages, setPackages] = useState<Package[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PACKAGES);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(p => ({
+            ...p,
+            active: p.active !== false,
+            places: p.places || [],
+            itinerary: p.itinerary || [],
+            includes: p.includes || [],
+            excludes: p.excludes || [],
+            gallery: p.gallery || (p.image ? [p.image] : [])
+          }));
+        }
+      }
     } catch {
       // ignore
     }
@@ -104,7 +117,10 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   const [destinations, setDestinations] = useState<Destination[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.DESTINATIONS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {
       // ignore
     }
@@ -114,7 +130,16 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.TESTIMONIALS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((t: any) => ({
+            ...t,
+            active: t.active !== false,
+            avatar: t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
+          }));
+        }
+      }
     } catch {
       // ignore
     }
@@ -128,7 +153,10 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   const [categories, setCategories] = useState<TourCategory[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {
       // ignore
     }
@@ -138,7 +166,10 @@ export function AgencyDataProvider({ children }: { children: React.ReactNode }) 
   const [settings, setSettings] = useState<SiteSettings>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_SETTINGS, ...parsed };
+      }
     } catch {
       // ignore
     }

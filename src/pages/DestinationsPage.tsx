@@ -1,4 +1,8 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAgencyData } from '@/context/AgencyDataContext';
+import SEOHead from '@/components/SEOHead';
+import { Mountain, Compass, ArrowRight } from 'lucide-react';
 
 export default function DestinationsPage() {
   const { destinations, packages } = useAgencyData();
@@ -35,7 +39,7 @@ export default function DestinationsPage() {
                   .filter((p): p is typeof packages[0] => Boolean(p && p.active !== false))
               : packages.filter(p => 
                   p.active !== false && (
-                    p.places.some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
+                    (p.places || []).some(pl => pl.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])) ||
                     p.title.toLowerCase().includes(dest.name.toLowerCase().split(' ')[0])
                   )
                 ).slice(0, 3);
@@ -122,7 +126,7 @@ export default function DestinationsPage() {
                           ))
                         ) : (
                           <Link 
-                            to="/tours"
+                            to="/tours" 
                             className="text-xs text-primary font-semibold hover:underline"
                           >
                             Ver todos los tours
